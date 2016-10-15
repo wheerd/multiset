@@ -7,7 +7,7 @@ if /I %1 == coverage goto :coverage
 goto :eof
 
 :init
-	pip install -r requirements.txt
+	pip install -r dev-requirements.txt
 goto :eof
 
 :test
