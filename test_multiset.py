@@ -8,8 +8,6 @@ import multiset
 
 @ddt
 class MultisetTest(unittest.TestCase):
-    """Unit tests for :class:`Multiset`"""
-
     def test_missing(self):
         m = Multiset()
         self.assertEqual(m[object()], 0)

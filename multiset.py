@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
 
-__version__ = 0.1
-
 from collections.abc import MutableSet, Set
 from typing import Generic, Iterable, Mapping, Optional, TypeVar, Union
 
