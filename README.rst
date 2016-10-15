@@ -1,1 +1,1 @@
-A multiset implementatiion for python.
+A multiset implementation for python.
