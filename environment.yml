@@ -1,0 +1,18 @@
+channels:
+  - conda-forge
+name: py35
+dependencies:
+- openssl
+- pip
+- python=3.5.2
+- readline
+- setuptools
+- sqlite
+- wheel
+- zlib
+- pip:
+  - Sphinx
+  - pylint
+  - ddt
+  - coverage
+  - sphinx-autodoc-typehints

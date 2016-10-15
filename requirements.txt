@@ -1,0 +1,5 @@
+Sphinx
+pylint
+ddt
+coverage
+sphinx-autodoc-typehints
