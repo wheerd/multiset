@@ -49,7 +49,7 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
 
     def __setitem__(self, element: T, multiplicity: int):
         """Set the element's multiplicity.
-        
+
         This will remove the element if the multiplicity is less than or equal to zero.
         '"""
         old = self[element]
@@ -363,7 +363,7 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
     def discard(self, element: T, multiplicity: Optional[int]=None) -> int: # pylint: disable=arguments-differ
         """Removes the `element` from the multiset.
 
-        If multiplicity is ``None``, all occurances of the element are removed:
+        If multiplicity is ``None``, all occurrences of the element are removed:
 
         >>> ms = Multiset('aab')
         >>> ms.discard('a')
@@ -427,7 +427,7 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
         True
 
         Args:
-            other: The other set to check disjointness. Can also be an :class:`~typing.Iterable`\[~T]
+            other: The other set to check disjointedness. Can also be an :class:`~typing.Iterable`\[~T]
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
         other = self._as_multiset(other)
@@ -642,8 +642,6 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
         """Empty the multiset."""
         super().clear()
         self._total = 0
-
-    clear.__doc__ = dict.clear.__doc__
 
     def _issubset(self, other: OtherType, strict: bool) -> bool:
         other = self._as_multiset(other)

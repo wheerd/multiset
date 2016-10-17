@@ -30,7 +30,7 @@ In contrast to the `collections.Counter`_ from the standard library, it has prop
 operations and only allows positive counts. Also, elements with a zero multiplicity are automatically
 removed from the multiset.
 
-There is currently not immutable version of the multiset, because there is no immutable version of dict_.
+There is currently no immutable version of the multiset, because there is no immutable version of dict_.
 
 
 Installation
