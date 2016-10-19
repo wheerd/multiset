@@ -817,7 +817,7 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
         """
         return super().fromkeys(elements, multiplicity)
 
-    def copy(self) -> Multiset[T]:
+    def copy(self) -> 'Multiset[T]':
         """Return a shallow copy of the multiset."""
         return type(self)(self)
 
