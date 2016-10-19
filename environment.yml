@@ -16,3 +16,4 @@ dependencies:
   - ddt
   - coverage
   - sphinx-autodoc-typehints
+  - setuptools_scm
