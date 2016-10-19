@@ -587,7 +587,7 @@ class MultisetTest(unittest.TestCase):
         self.assertFalse(set('ab') >= Multiset('aab'))
         self.assertLessEqual(set('ab'), Multiset('aab'))
         self.assertGreaterEqual(set('ab'), Multiset('ab'))
-    
+
     def test_eq_set(self):
         multisets = ['', 'a', 'ab', 'aa']
         sets = ['', 'a', 'ab']
@@ -641,6 +641,23 @@ class MultisetTest(unittest.TestCase):
 
         self.assertEqual(ms, ms_copy)
         self.assertIsNot(ms, ms_copy)
+
+    def test_dict_methods(self):
+        ms = Multiset('aab')
+        self.assertEqual(ms.get('a', 5), 2)
+        self.assertEqual(ms.get('b', 5), 1)
+        self.assertEqual(ms.get('c', 5), 5)
+
+        self.assertEqual(ms.pop('a', 5), 2)
+        self.assertEqual(ms.pop('c', 3), 3)
+        self.assertEqual(['b'], sorted(ms))
+
+        self.assertEqual(ms.setdefault('b', 5), 1)
+        self.assertEqual(ms.setdefault('c', 3), 3)
+        self.assertEqual(['b', 'c', 'c', 'c'], sorted(ms))
+
+        ms = Multiset.fromkeys('abc', 2)
+        self.assertEqual(['a', 'a', 'b', 'b', 'c', 'c'], sorted(ms))
 
 
 def load_tests(loader, tests, ignore):

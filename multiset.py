@@ -759,7 +759,65 @@ class Multiset(dict, MutableSet, Mapping[T, int], Generic[T]):
             return True
         return not self._issubset(other, False)
 
-    def copy(self):
+    def get(self, elem: T, default: int) -> int:
+        """Return the multiplicity for *elem* if it is in the multiset, else *default*.
+
+        Makes the *default* argument of the original :meth:`dict.get` non-optional.
+
+        Args:
+            elem: The element of which to get the multiplicity.
+            default: The default value to return if the element if not in the multiset.
+
+        Returns:
+            The multiplicity for *elem* if it is in the multiset, else *default*.
+        """
+        return super().get(elem, default)
+
+    def pop(self, elem: T, default: int) -> int:
+        """If *elem* is in the multiset, remove it and return its multiplicity, else return *default*.
+
+        Makes the *default* argument of the original :meth:`dict.pop` non-optional.
+
+        Args:
+            elem: The element which is removed.
+            default: The default value to return if the element if not in the multiset.
+
+        Returns:
+            The multiplicity for *elem* if it is in the multiset, else *default*.
+        """
+        return super().pop(elem, default)
+
+    def setdefault(self, elem: T, default: int) -> int:
+        """If *elem* is in the multiset, return its multiplicity.
+        Else add it with a multiplicity of *default* and return *default*.
+
+        Makes the *default* argument of the original :meth:`dict.setdefault` non-optional.
+
+        Args:
+            elem: The element which is added if not already present.
+            default: The default multiplicity to add the element with if not in the multiset.
+
+        Returns:
+            The multiplicity for *elem* if it is in the multiset, else *default*.
+        """
+        return super().setdefault(elem, default)
+
+    @classmethod
+    def fromkeys(cls, elements: Iterable[T], multiplicity: int) -> 'Multiset[T]':
+        """Create a new multiset with the given *elements* and each multiplicity set to *multiplicity*.
+
+        Makes the *value* argument of the original :meth:`dict.fromkeys` non-optional.
+
+        Args:
+            elements: The element for the new multiset.
+            multiplicity: The multiplicity for all elements.
+
+        Returns:
+            The new multiset.
+        """
+        return super().fromkeys(elements, multiplicity)
+
+    def copy(self) -> Multiset[T]:
         """Return a shallow copy of the multiset."""
         return type(self)(self)
 
