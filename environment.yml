@@ -15,5 +15,5 @@ dependencies:
   - pylint
   - ddt
   - coverage
-  - sphinx-autodoc-typehints
+  - git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
   - setuptools_scm

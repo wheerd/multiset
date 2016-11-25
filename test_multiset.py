@@ -656,12 +656,13 @@ class MultisetTest(unittest.TestCase):
         self.assertEqual(ms.setdefault('c', 3), 3)
         self.assertEqual(['b', 'c', 'c', 'c'], sorted(ms))
 
-        ms = Multiset.fromkeys('abc', 2)
+        ms = Multiset.from_elements('abc', 2)
         self.assertEqual(['a', 'a', 'b', 'b', 'c', 'c'], sorted(ms))
 
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(multiset))
+    tests.addTests(doctest.DocFileSuite('docs/index.rst', globs={'Multiset': Multiset}))
     return tests
 
 if __name__ == '__main__':

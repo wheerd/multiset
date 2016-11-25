@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx_autodoc_typehints',
+    'sphinx_autodoc_napoleon_typehints',
     'sphinx.ext.napoleon',
     'alabaster',
 ]
@@ -367,4 +367,7 @@ texinfo_documents = [
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}
 
-napoleon_use_ivar = True
+napoleon_use_ivar = False
+napoleon_use_rtype = False
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
