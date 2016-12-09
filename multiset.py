@@ -43,7 +43,20 @@ class Multiset(Mapping[T, int], Generic[T]):
         self._elements = dict()
         self._total = 0
         if iterable is not None:
-            self.update(iterable)
+            if isinstance(iterable, Mapping):
+                for element, multiplicity in iterable.items():
+                    if multiplicity < 0:
+                        multiplicity = 0
+                    self._elements[element] = multiplicity
+                    self._total += multiplicity
+            else:
+                for element in iterable:
+                    if element in self._elements:
+                        self._elements[element] += 1
+                    else:
+                        self._elements[element] = 1
+                    self._total += 1
+
 
     def __getitem__(self, element: T):
         """The multiplicity of an element or zero if it is not in the multiset."""
