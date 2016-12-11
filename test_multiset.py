@@ -1,16 +1,29 @@
 # -*- coding: utf-8 -*-
-import unittest
 import doctest
-from ddt import ddt, data, unpack
+import itertools
+import unittest
 
-from multiset import Multiset
 import multiset
+from ddt import data, ddt, unpack
+from multiset import Multiset
+
 
 @ddt
 class MultisetTest(unittest.TestCase):
     def test_missing(self):
         m = Multiset()
         self.assertEqual(m[object()], 0)
+
+    @data(
+        'abc',
+        'babccaad',
+        range(100),
+        itertools.chain.from_iterable(itertools.repeat(n, n) for n in range(1, 10))
+    )
+    def test_iter(self, iterable):
+        iter1, iter2 = itertools.tee(iterable, 2)
+        m = Multiset(iter1)
+        self.assertEqual(sorted(m), sorted(iter2))
 
     def test_setitem(self):
         m = Multiset()
@@ -209,6 +222,9 @@ class MultisetTest(unittest.TestCase):
     def test_add(self):
         m = Multiset('aab')
 
+        with self.assertRaises(ValueError):
+            m.add('a', 0)
+
         self.assertNotIn('c', m)
         m.add('c')
         self.assertIn('c', m)
@@ -228,60 +244,74 @@ class MultisetTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             m.remove('x')
 
+        with self.assertRaises(ValueError):
+            m.remove('a', 0)
+
+        with self.assertRaises(ValueError):
+            m.remove('a', -1)
+
+        self.assertEqual(len(m), 7)
+
         self.assertIn('c', m)
         count = m.remove('c')
         self.assertNotIn('c', m)
         self.assertEqual(count, 1)
+        self.assertEqual(len(m), 6)
 
         self.assertIn('b', m)
         count = m.remove('b')
         self.assertNotIn('b', m)
         self.assertEqual(count, 2)
+        self.assertEqual(len(m), 4)
 
         self.assertIn('a', m)
         count = m.remove('a', 1)
         self.assertIn('a', m)
         self.assertEqual(count, 4)
         self.assertEqual(m['a'], 3)
+        self.assertEqual(len(m), 3)
 
         count = m.remove('a', 2)
         self.assertIn('a', m)
         self.assertEqual(count, 3)
         self.assertEqual(m['a'], 1)
-
-        count = m.remove('a', 0)
-        self.assertIn('a', m)
-        self.assertEqual(count, 1)
-        self.assertEqual(m['a'], 1)
+        self.assertEqual(len(m), 1)
 
     def test_discard(self):
         m = Multiset('aaaabbc')
+
+        with self.assertRaises(ValueError):
+            m.discard('a', 0)
+
+        with self.assertRaises(ValueError):
+            m.discard('a', -1)
+
+        self.assertEqual(len(m), 7)
 
         self.assertIn('c', m)
         count = m.discard('c')
         self.assertNotIn('c', m)
         self.assertEqual(count, 1)
+        self.assertEqual(len(m), 6)
 
         self.assertIn('b', m)
         count = m.discard('b')
         self.assertNotIn('b', m)
         self.assertEqual(count, 2)
+        self.assertEqual(len(m), 4)
 
         self.assertIn('a', m)
         count = m.discard('a', 1)
         self.assertIn('a', m)
         self.assertEqual(count, 4)
         self.assertEqual(m['a'], 3)
+        self.assertEqual(len(m), 3)
 
         count = m.discard('a', 2)
         self.assertIn('a', m)
         self.assertEqual(count, 3)
         self.assertEqual(m['a'], 1)
-
-        count = m.discard('a', 0)
-        self.assertIn('a', m)
-        self.assertEqual(count, 1)
-        self.assertEqual(m['a'], 1)
+        self.assertEqual(len(m), 1)
 
     @unpack
     @data(
@@ -641,6 +671,12 @@ class MultisetTest(unittest.TestCase):
 
         self.assertEqual(ms, ms_copy)
         self.assertIsNot(ms, ms_copy)
+
+    def test_bool(self):
+        self.assertTrue(Multiset('abc'))
+        self.assertFalse(Multiset())
+        self.assertFalse(Multiset({}))
+        self.assertFalse(Multiset([]))
 
     def test_dict_methods(self):
         ms = Multiset('aab')

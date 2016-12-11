@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
 
-from collections.abc import Set
-from typing import Generic, Iterable, Mapping, Optional, TypeVar, Union
+import functools
+from collections import defaultdict
+from collections.abc import Iterable as ABCIterable
+from collections.abc import Mapping, Set, Sized
+from itertools import chain, repeat, starmap
+from typing import Mapping as MappingType
+from typing import Generic, Iterable, Optional, TypeVar, Union
 
 T = TypeVar('T')
-OtherType = Union[Iterable[T], Mapping[T, int]]
+OtherType = Union[Iterable[T], MappingType[T, int]]
 
-class Multiset(Mapping[T, int], Generic[T]):
+class Multiset(MappingType[T, int], Generic[T]):
     """A multiset implementation.
 
     A multiset is similar to the builtin :class:`set`, but elements can occur multiple times in the multiset.
@@ -37,28 +42,36 @@ class Multiset(Mapping[T, int], Generic[T]):
         >>> ms = Multiset({'a': 4, 'b': 2}) # a new multiset from a mapping
 
         Args:
-            iterable: An optional :class:`~typing.Iterable`\[~T] or
-                :class:`~typing.Mapping`\[~T, :class:`int`] to initialize the multiset from.
+            iterable:
+                An optional iterable of elements or mapping of elements to multiplicity to
+                initialize the multiset from.
         """
-        self._elements = dict()
-        self._total = 0
-        if iterable is not None:
-            if isinstance(iterable, Mapping):
-                for element, multiplicity in iterable.items():
-                    if multiplicity < 0:
-                        multiplicity = 0
-                    self._elements[element] = multiplicity
-                    self._total += multiplicity
-            else:
-                for element in iterable:
-                    if element in self._elements:
-                        self._elements[element] += 1
-                    else:
-                        self._elements[element] = 1
-                    self._total += 1
+        if isinstance(iterable, Multiset):
+            self._elements = iterable._elements.copy()
+            self._total = iterable._total
+        else:
+            self._elements = _elements = defaultdict(int)
+            _total = 0
+            if iterable is not None:
+                if isinstance(iterable, Mapping):
+                    for element, multiplicity in iterable.items():
+                        if multiplicity > 0:
+                            _elements[element] = multiplicity
+                            _total += multiplicity
+                elif isinstance(iterable, Sized):
+                    for element in iterable:
+                        _elements[element] += 1
+                    _total = len(iterable)
+                else:
+                    for element in iterable:
+                        _elements[element] += 1
+                        _total += 1
+            self._total = _total
 
+    def __contains__(self, element: T) -> bool:
+        return element in self._elements
 
-    def __getitem__(self, element: T):
+    def __getitem__(self, element: T) -> int:
         """The multiplicity of an element or zero if it is not in the multiset."""
         return self._elements.get(element, 0)
 
@@ -67,14 +80,18 @@ class Multiset(Mapping[T, int], Generic[T]):
 
         This will remove the element if the multiplicity is less than or equal to zero.
         '"""
-        old = self._elements.get(element, 0)
-        new = multiplicity > 0 and multiplicity or 0
-        if multiplicity <= 0:
-            if element in self._elements:
-                del self._elements[element]
-        else:
-            self._elements[element] = multiplicity
-        self._total += new - old
+        _elements = self._elements
+        if element in _elements:
+            old_multiplicity = _elements[element]
+            if multiplicity > 0:
+                _elements[element] = multiplicity
+                self._total += multiplicity - old_multiplicity
+            else:
+                del _elements[element]
+                self._total -= old_multiplicity
+        elif multiplicity > 0:
+            _elements[element] = multiplicity
+            self._total += multiplicity
 
     def __delitem__(self, element: T) -> None:
         del self._elements[element]
@@ -83,7 +100,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         return '{%s}' % ', '.join(map(str, self))
 
     def __repr__(self):
-        items = ', '.join('%r: %r' % item for item in self.items())
+        items = ', '.join('%r: %r' % item for item in self._elements.items())
         return '%s({%s})' % (type(self).__name__, items)
 
     def __len__(self):
@@ -108,9 +125,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         return self._total
 
     def __iter__(self):
-        for element, multiplicity in self.items():
-            for _ in range(multiplicity):
-                yield element
+        return chain.from_iterable(starmap(repeat, self._elements.items()))
 
     def update(self, *others: OtherType) -> None:
         r"""Like :meth:`dict.update` but add multiplicities instead of replacing them.
@@ -134,7 +149,8 @@ class Multiset(Mapping[T, int], Generic[T]):
             others: The other sets to add to this multiset. Can also be any :class:`~typing.Iterable`\[~T]
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
-        for other in others:
+        _elements = self._elements
+        for other in map(self._as_mapping, others):
             if isinstance(other, Mapping):
                 for element, multiplicity in other.items():
                     self[element] += multiplicity
@@ -165,10 +181,11 @@ class Multiset(Mapping[T, int], Generic[T]):
             others: The other sets to union this multiset with. Can also be any :class:`~typing.Iterable`\[~T]
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
-        for other in map(self._as_multiset, others):
+        _elements = self._elements
+        for other in map(self._as_mapping, others):
             for element, multiplicity in other.items():
-                if multiplicity > self[element]:
-                    self[element] = multiplicity
+                if multiplicity > _elements.get(element, 0):
+                    _elements[element] = multiplicity
 
     def __ior__(self, other):
         if not isinstance(other, (Set, Multiset)):
@@ -199,9 +216,9 @@ class Multiset(Mapping[T, int], Generic[T]):
             others: The other sets to intersect this multiset with. Can also be any :class:`~typing.Iterable`\[~T]
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
-        for other in map(self._as_multiset, others):
+        for other in map(self._as_mapping, others):
             for element, current_count in list(self.items()):
-                multiplicity = other[element]
+                multiplicity = other.get(element, 0)
                 if multiplicity < current_count:
                     self[element] = multiplicity
 
@@ -311,7 +328,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         self.times_update(factor)
         return self
 
-    def add(self, element: T, multiplicity: int=1) -> None: # pylint: disable=arguments-differ
+    def add(self, element: T, multiplicity: int=1) -> None:
         """Adds an element to the multiset.
 
         >>> ms = Multiset()
@@ -333,9 +350,12 @@ class Multiset(Mapping[T, int], Generic[T]):
             multiplicity:
                 The multiplicity i.e. count of elements to add.
         """
-        self[element] = self[element] + multiplicity
+        if multiplicity < 1:
+            raise ValueError("Multiplicity must be positive")
+        self._elements[element] += multiplicity
+        self._total += multiplicity
 
-    def remove(self, element: T, multiplicity: Optional[int]=None) -> int: # pylint: disable=arguments-differ
+    def remove(self, element: T, multiplicity: Optional[int]=None) -> int:
         """Removes an element from the multiset.
 
         If no multiplicity is specified, the element is completely removed from the multiset:
@@ -353,6 +373,13 @@ class Multiset(Mapping[T, int], Generic[T]):
         >>> sorted(ms)
         ['b', 'c']
 
+        It is not an error to remove more elements than are in the set:
+
+        >>> ms.remove('b', 2)
+        1
+        >>> sorted(ms)
+        ['c']
+
         This extends the :meth:`MutableSet.remove` signature to allow specifying the multiplicity.
 
         Args:
@@ -369,16 +396,21 @@ class Multiset(Mapping[T, int], Generic[T]):
             KeyError: if the element is not contained in the set. Use :meth:`discard` if
                 you do not want an exception to be raised.
         """
-        if element not in self:
+        _elements = self._elements
+        if element not in _elements:
             raise KeyError
-        old_count = self[element]
-        if multiplicity is None:
-            del self[element]
+        old_multiplicity = _elements[element]
+        if multiplicity is None or multiplicity >= old_multiplicity:
+            del _elements[element]
+            self._total -= old_multiplicity
+        elif multiplicity < 1:
+            raise ValueError("Multiplicity must be positive")
         else:
-            self[element] = self[element] - multiplicity
-        return old_count
+            _elements[element] -= multiplicity
+            self._total -= multiplicity
+        return old_multiplicity
 
-    def discard(self, element: T, multiplicity: Optional[int]=None) -> int: # pylint: disable=arguments-differ
+    def discard(self, element: T, multiplicity: Optional[int]=None) -> int:
         """Removes the `element` from the multiset.
 
         If multiplicity is ``None``, all occurrences of the element are removed:
@@ -389,7 +421,8 @@ class Multiset(Mapping[T, int], Generic[T]):
         >>> sorted(ms)
         ['b']
 
-        Otherwise, the multiplicity is subtracted from the one in the multiset:
+        Otherwise, the multiplicity is subtracted from the one in the multiset and the
+        old multiplicity is removed:
 
         >>> ms = Multiset('aab')
         >>> ms.discard('a', 1)
@@ -406,6 +439,13 @@ class Multiset(Mapping[T, int], Generic[T]):
         >>> sorted(ms)
         ['a']
 
+        It is also not an error to remove more elements than are in the set:
+
+        >>> ms.remove('a', 2)
+        1
+        >>> sorted(ms)
+        []
+
         Args:
             element:
                 The element to remove from the multiset.
@@ -416,22 +456,20 @@ class Multiset(Mapping[T, int], Generic[T]):
             The multiplicity of the element in the multiset before
             the removal.
         """
-        if element in self:
-            old_count = self[element]
-            if multiplicity is None:
-                del self[element]
+        _elements = self._elements
+        if element in _elements:
+            old_multiplicity = _elements[element]
+            if multiplicity is None or multiplicity >= old_multiplicity:
+                del _elements[element]
+                self._total -= old_multiplicity
+            elif multiplicity < 1:
+                raise ValueError("Multiplicity must be positive")
             else:
-                self[element] -= multiplicity
-            return old_count
+                _elements[element] -= multiplicity
+                self._total -= multiplicity
+            return old_multiplicity
         else:
             return 0
-
-    def _as_multiset(self, other: OtherType) -> 'Multiset[T]':
-        if not isinstance(other, Multiset):
-            if not isinstance(other, Iterable):
-                raise TypeError("'%s' object is not iterable" % type(other))
-            return type(self)(other)
-        return other
 
     def isdisjoint(self, other: OtherType) -> bool:
         r"""Return True if the set has no elements in common with other.
@@ -449,10 +487,7 @@ class Multiset(Mapping[T, int], Generic[T]):
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
         other = self._as_multiset(other)
-        for element in self.distinct_elements():
-            if element in other:
-                return False
-        return True
+        return all(element not in other._elements for element in self._elements.keys())
 
     def difference(self, *others: OtherType) -> 'Multiset[T]':
         r"""Return a new multiset with all elements from the others removed.
@@ -478,7 +513,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Returns:
             The resulting difference multiset.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.difference_update(*others)
         return result
 
@@ -511,7 +546,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Returns:
             The multiset resulting from the union.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.union_update(*others)
         return result
 
@@ -546,7 +581,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Returns:
             The multiset resulting from the addition of the sets.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.update(*others)
         return result
 
@@ -581,7 +616,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Returns:
             The multiset resulting from the intersection of the sets.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.intersection_update(*others)
         return result
 
@@ -616,7 +651,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Returns:
             The resulting symmetric difference multiset.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.symmetric_difference_update(other)
         return result
 
@@ -645,7 +680,7 @@ class Multiset(Mapping[T, int], Generic[T]):
         Args:
             factor: The factor to multiply each multiplicity with.
         """
-        result = type(self)(self)
+        result = self.__copy__()
         result.times_update(factor)
         return result
 
@@ -663,15 +698,13 @@ class Multiset(Mapping[T, int], Generic[T]):
 
     def _issubset(self, other: OtherType, strict: bool) -> bool:
         other = self._as_multiset(other)
+        self_len = self._total
         other_len = len(other)
-        if len(self) > other_len:
+        if self_len > other_len:
             return False
-        if len(self) == other_len and strict:
+        if self_len == other_len and strict:
             return False
-        for element, multiplicity in self.items():
-            if multiplicity > other[element]:
-                return False
-        return True
+        return all(multiplicity <= other[element] for element, multiplicity in self.items())
 
     def issubset(self, other: OtherType) -> bool:
         """Return True iff this set is a subset of the other.
@@ -763,8 +796,8 @@ class Multiset(Mapping[T, int], Generic[T]):
         if not isinstance(other, (Set, Multiset)):
             return NotImplemented
         if isinstance(other, Multiset):
-            return self._elements == other._elements
-        if len(self) != len(other):
+            return self._total == other._total and self._elements == other._elements
+        if self._total != len(other):
             return False
         return self._issubset(other, False)
 
@@ -772,8 +805,8 @@ class Multiset(Mapping[T, int], Generic[T]):
         if not isinstance(other, (Set, Multiset)):
             return NotImplemented
         if isinstance(other, Multiset):
-            return self._elements != other._elements
-        if len(self) != len(other):
+            return self._total != other._total or self._elements != other._elements
+        if self._total != len(other):
             return True
         return not self._issubset(other, False)
 
@@ -837,7 +870,7 @@ class Multiset(Mapping[T, int], Generic[T]):
 
     def copy(self) -> 'Multiset[T]':
         """Return a shallow copy of the multiset."""
-        return type(self)(self)
+        return self.__class__(self)
 
     __copy__ = copy
 
@@ -849,6 +882,30 @@ class Multiset(Mapping[T, int], Generic[T]):
 
     def multiplicities(self):
         return self._elements.values()
+
+    @classmethod
+    def _as_multiset(cls, other: OtherType) -> 'Multiset[T]':
+        if not isinstance(other, Multiset):
+            if not isinstance(other, ABCIterable):
+                raise TypeError("'%s' object is not iterable" % type(other))
+            return cls(other)
+        return other
+
+    @staticmethod
+    def _as_mapping(iterable: OtherType) -> 'Multiset[T]':
+        if isinstance(iterable, Multiset):
+            return iterable._elements
+        if isinstance(iterable, Mapping):
+            return iterable
+        if not isinstance(iterable, ABCIterable):
+            raise TypeError("'%s' object is not iterable" % type(iterable))
+        mapping = dict()
+        for element in iterable:
+            if element in mapping:
+                mapping[element] += 1
+            else:
+                mapping[element] = 1
+        return mapping
 
 
 if __name__ == '__main__':
