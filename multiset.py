@@ -12,6 +12,7 @@ from typing import Generic, Iterable, Optional, TypeVar, Union
 T = TypeVar('T')
 OtherType = Union[Iterable[T], MappingType[T, int]]
 
+
 class Multiset(MappingType[T, int], Generic[T]):
     """A multiset implementation.
 
@@ -123,6 +124,9 @@ class Multiset(MappingType[T, int], Generic[T]):
         2
         """
         return self._total
+
+    def __bool__(self) -> bool:
+        return self._total > 0
 
     def __iter__(self):
         return chain.from_iterable(starmap(repeat, self._elements.items()))
