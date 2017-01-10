@@ -23,15 +23,27 @@ Multisets can be used in combination with sets_::
     >>> Multiset('aab') >= {'a', 'b'}
     True
 
+Multisets are mutable::
+
+    >>> set1.update('bc')
+    >>> sorted(set1)
+    ['a', 'a', 'b', 'b', 'c']
+
+There is an immutable version similar to the frozenset_ which is also hashable::
+
+    >>> set1 = FrozenMultiset('abc')
+    >>> set2 = FrozenMultiset('abc')
+    >>> hash(set1) == hash(set2)
+    True
+    >>> set1 is set2
+    False
+
 The implementation is based on a dict_ that maps the elements to their multiplicity in the multiset.
 Hence, some dictionary operations are supported.
 
 In contrast to the `collections.Counter`_ from the standard library, it has proper support for set
 operations and only allows positive counts. Also, elements with a zero multiplicity are automatically
 removed from the multiset.
-
-There is currently no immutable version of the multiset, because there is no immutable version of dict_.
-
 
 Installation
 ------------
@@ -64,6 +76,7 @@ Licensed under the MIT_ license.
 .. _multiset: https://en.wikipedia.org/wiki/Multiset
 .. _set: https://docs.python.org/3.5/library/stdtypes.html#set-types-set-frozenset
 .. _sets: set_
+.. _frozenset: set_
 .. _dict: https://docs.python.org/3.5/library/stdtypes.html#mapping-types-dict
 .. _`collections.Counter`: https://docs.python.org/3.5/library/collections.html#collections.Counter
 .. _MIT: https://opensource.org/licenses/MIT
@@ -76,7 +89,7 @@ Licensed under the MIT_ license.
 .. |coverage| image:: https://coveralls.io/repos/github/wheerd/multiset/badge.svg?branch=master
     :target: https://coveralls.io/github/wheerd/multiset?branch=master
     :alt: Test coverage
-    
+
 .. |build| image:: https://travis-ci.org/wheerd/multiset.svg?branch=master
     :target: https://travis-ci.org/wheerd/multiset
     :alt: Build status of the master branch

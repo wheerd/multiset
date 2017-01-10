@@ -8,9 +8,6 @@ root = os.path.dirname(__file__)
 with open(os.path.join(root, 'README.rst')) as f:
     readme = f.read()
 
-with open(os.path.join(root, 'LICENSE')) as f:
-    license = f.read()
-
 setup(
     name='multiset',
     use_scm_version=True,
