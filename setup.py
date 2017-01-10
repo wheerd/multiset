@@ -29,19 +29,14 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'
+        'Programming Language :: Python :: 3.6',
     ],
     setup_requires=[
-        'setuptools_scm >= 1.7.0'
+        'setuptools_scm >= 1.7.0',
+        'pytest-runner',
     ],
     tests_require=[
-        'ddt'
+        'pytest',
     ],
-    extras_require={
-        ':python_version == "3.3"': 'typing >= 3.5',
-        ':python_version == "3.4"': 'typing >= 3.5'
-    }
 )
 

@@ -1,6 +1,6 @@
 Sphinx
 pylint
-ddt
-coverage
+pytest
+pytest-cov
 git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
 setuptools_scm

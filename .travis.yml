@@ -1,8 +1,6 @@
 language: python
 python:
-- '3.3'
-- '3.4'
-- '3.5'
+- '3.6'
 install:
 - make init
 - pip install coveralls
@@ -21,7 +19,7 @@ deploy:
       branch: master
       tags: false
       distributions: sdist bdist_wheel
-      condition: $TRAVIS_PYTHON_VERSION = "3.5"
+      condition: $TRAVIS_PYTHON_VERSION = "3.6"
   # production pypi
   - provider: pypi
     user: Wheerd
@@ -31,4 +29,4 @@ deploy:
       branch: master
       tags: true
       distributions: sdist bdist_wheel
-      condition: $TRAVIS_PYTHON_VERSION = "3.5"
+      condition: $TRAVIS_PYTHON_VERSION = "3.6"
