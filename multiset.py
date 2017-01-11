@@ -69,10 +69,10 @@ class BaseMultiset(MappingType[T, int], Generic[T]):
                         _total += 1
             self._total = _total
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, iterable=None):
         if cls is BaseMultiset:
             raise TypeError("Cannot instantiate BaseMultiset directly, use either Multiset or FrozenMultiset.")
-        return super(BaseMultiset, cls).__new__(cls, *args, **kwargs)
+        return super(BaseMultiset, cls).__new__(cls)
 
     def __contains__(self, element: T) -> bool:
         return element in self._elements

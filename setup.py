@@ -31,6 +31,7 @@ setup(
     setup_requires=[
         'setuptools_scm >= 1.7.0',
         'pytest-runner',
+        'distutils_build_without_typehints',
     ],
     tests_require=[
         'pytest',
