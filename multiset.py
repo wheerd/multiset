@@ -3,8 +3,12 @@
 
 import functools
 from collections import defaultdict
-from collections.abc import Iterable as ABCIterable
-from collections.abc import Mapping, Set, Sized, Container
+try:
+    from collections.abc import Iterable as ABCIterable
+    from collections.abc import Mapping, Set, Sized, Container
+except ImportError:
+    from collections import Iterable as ABCIterable
+    from collections import Mapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
 from typing import Mapping as MappingType
 from typing import Generic, Iterable, Optional, TypeVar, Union, MutableMapping
@@ -586,6 +590,8 @@ class Multiset(BaseMultiset[T], MutableMapping[T, int], Generic[T]):
 
         This will remove the element if the multiplicity is less than or equal to zero.
         '"""
+        if not isinstance(multiplicity, int):
+            raise TypeError('multiplicity must be an integer')
         _elements = self._elements
         if element in _elements:
             old_multiplicity = _elements[element]

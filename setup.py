@@ -19,7 +19,7 @@ setup(
     license='MIT',
     zip_safe=True,
     py_modules=['multiset'],
-    test_suite='test_multiset',
+    test_suite='tests',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

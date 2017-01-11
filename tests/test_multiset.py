@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import doctest
 import itertools
 import pytest
+import sys
 
 import multiset
 from multiset import Multiset
@@ -124,6 +124,7 @@ def test_ior():
 
     m |= Multiset('abc')
     assert sorted(m) == list('abc')
+
 
 @pytest.mark.parametrize(
     '   initial,    args,                   result',
@@ -627,9 +628,6 @@ def test_le(MultisetCls):
     set2 = MultisetCls('aab')
     set3 = MultisetCls('ac')
 
-    with pytest.raises(TypeError):
-        _ = set1 <= 'x'
-
     assert set1 <= set2
     assert not set2 <= set1
     assert set1 <= set1
@@ -638,13 +636,16 @@ def test_le(MultisetCls):
     assert not set3 <= set1
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
+def test_le_error(MultisetCls):
+    with pytest.raises(TypeError):
+        MultisetCls('ab') <= 'x'
+
+
 def test_lt(MultisetCls):
     set1 = MultisetCls('ab')
     set2 = MultisetCls('aab')
     set3 = MultisetCls('ac')
-
-    with pytest.raises(TypeError):
-        _ = set1 < 'x'
 
     assert set1 < set2
     assert not set2 < set1
@@ -652,6 +653,12 @@ def test_lt(MultisetCls):
     assert not set2 < set2
     assert not set1 <= set3
     assert not set3 <= set1
+
+
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
+def test_lt_error(MultisetCls):
+    with pytest.raises(TypeError):
+        MultisetCls('ab') < 'x'
 
 
 @pytest.mark.parametrize(
@@ -681,9 +688,6 @@ def test_ge(MultisetCls):
     set2 = MultisetCls('aab')
     set3 = MultisetCls('ac')
 
-    with pytest.raises(TypeError):
-        _ = set1 >= 'x'
-
     assert set1 >= set1
     assert not set1 >= set2
     assert not set1 >= set3
@@ -697,13 +701,16 @@ def test_ge(MultisetCls):
     assert set3 >= set3
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
+def test_ge_error(MultisetCls):
+    with pytest.raises(TypeError):
+        MultisetCls('ab') >= 'x'
+
+
 def test_gt(MultisetCls):
     set1 = MultisetCls('ab')
     set2 = MultisetCls('aab')
     set3 = MultisetCls('ac')
-
-    with pytest.raises(TypeError):
-        _ = set1 > 'x'
 
     assert not set1 > set1
     assert not set1 > set2
@@ -716,6 +723,12 @@ def test_gt(MultisetCls):
     assert not set3 > set1
     assert not set3 > set2
     assert not set3 > set3
+
+
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
+def test_gt_error(MultisetCls):
+    with pytest.raises(TypeError):
+        MultisetCls('ab') > 'x'
 
 
 def test_compare_with_set(MultisetCls):
