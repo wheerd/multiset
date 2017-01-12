@@ -2,6 +2,7 @@
 import os.path
 
 from setuptools import setup
+from distutils_build_without_typehints.build_without_typehints import build_without_typehints
 
 root = os.path.dirname(__file__)
 
@@ -36,5 +37,8 @@ setup(
     tests_require=[
         'pytest',
     ],
+    cmdclass = {
+        'build': build_without_typehints
+    },
 )
 
