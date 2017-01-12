@@ -15,10 +15,7 @@ install:
 - pip install coveralls
 script:
 - tox
-- python setup.py install
-- cd tests
-- coverage run --source multiset -m py.test
-- coverage report -m
+- if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; make coverage; fi
 after_success: coveralls
 deploy:
   # test pypi
