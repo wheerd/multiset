@@ -32,10 +32,10 @@ setup(
     setup_requires=[
         'setuptools_scm >= 1.7.0',
         'pytest-runner',
-        'distutils_build_without_typehints',
+        'distutils_build_without_typehints>=0.6.1',
     ],
     tests_require=[
-        'pytest',
+        'pytest>=3.0',
     ],
     cmdclass = {
         'build_py': build_py
