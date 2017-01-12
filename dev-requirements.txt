@@ -5,4 +5,3 @@ coverage
 git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
 setuptools_scm
 tox
-distutils_build_without_typehints
