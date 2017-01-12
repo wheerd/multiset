@@ -15,7 +15,7 @@ install:
 - pip install coveralls
 script:
 - tox
-- if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; make coverage; fi
+- if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then make coverage; fi
 after_success: coveralls
 deploy:
   # test pypi
