@@ -2,11 +2,11 @@ init:
 	pip install -r dev-requirements.txt
 
 test:
-	python -m unittest test_multiset
+	py.test tests/ --doctest-modules multiset.py README.rst
 
 check:
 	pylint multiset
 
 coverage:
-	coverage run --source multiset.py -m test_multiset
-	coverage html
+	coverage run --source multiset -m py.test
+	coverage report -m

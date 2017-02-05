@@ -1,10 +1,10 @@
 channels:
   - conda-forge
-name: py36
+name: py35
 dependencies:
 - openssl
 - pip
-- python=3.6
+- python=3.5.3
 - readline
 - setuptools
 - sqlite
@@ -13,7 +13,7 @@ dependencies:
 - pip:
   - Sphinx
   - pylint
-  - ddt
-  - coverage
+  - pytest
+  - pytest-cov
   - git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
   - setuptools_scm

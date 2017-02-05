@@ -1,6 +1,8 @@
-Sphinx
-pylint
-ddt
-coverage
+Sphinx>=1.5,<2
+pylint>=1.6,<2
+pytest>=3.0,<4
+coverage>=4.3,<5
 git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
-setuptools_scm
+setuptools_scm>=1.15,<2.0
+tox>=2.5,<3.0
+distutils_build_without_typehints>=0.6.1
