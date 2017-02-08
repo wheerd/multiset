@@ -2,7 +2,6 @@
 import os.path
 
 from setuptools import setup
-from distutils_build_without_typehints.build_without_typehints import build_py
 
 root = os.path.dirname(__file__)
 
@@ -35,13 +34,9 @@ setup(
     setup_requires=[
         'setuptools_scm >= 1.7.0',
         'pytest-runner',
-        'distutils_build_without_typehints>=0.6.1',
     ],
     tests_require=[
         'pytest>=3.0',
     ],
-    cmdclass = {
-        'build_py': build_py
-    },
 )
 
