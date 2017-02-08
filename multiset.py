@@ -16,10 +16,17 @@ class BaseMultiset:
     It is also similar to a :class:`list` without ordering of the values and hence no index-based operations.
 
     The multiset internally uses a :class:`dict` for storage where the key is the element and the value its
-    multiplicity. It supports all operations, that the :class:`set` supports
+    multiplicity. It supports all operations that the :class:`set` supports.
 
     In contrast to the builtin :class:`collections.Counter`, no negative counts are allowed, elements with
     zero counts are removed from the :class:`dict`, and set operations are supported.
+
+    The multiset comes in two variants, `Multiset` and `FrozenMultiset` which correspond to the `set` and
+    `frozenset` classes, respectively.
+
+    .. warning::
+
+        You cannot instantiate this class directly. Use one of its variants instead.
 
     :see: https://en.wikipedia.org/wiki/Multiset
     """
@@ -879,9 +886,9 @@ class Multiset(BaseMultiset):
         if multiplicity is None or multiplicity >= old_multiplicity:
             del _elements[element]
             self._total -= old_multiplicity
-        elif multiplicity < 1:
-            raise ValueError("Multiplicity must be positive")
-        else:
+        elif multiplicity < 0:
+            raise ValueError("Multiplicity must be not be negative")
+        elif multiplicity > 0:
             _elements[element] -= multiplicity
             self._total -= multiplicity
         return old_multiplicity
@@ -938,9 +945,9 @@ class Multiset(BaseMultiset):
             if multiplicity is None or multiplicity >= old_multiplicity:
                 del _elements[element]
                 self._total -= old_multiplicity
-            elif multiplicity < 1:
-                raise ValueError("Multiplicity must be positive")
-            else:
+            elif multiplicity < 0:
+                raise ValueError("Multiplicity must not be negative")
+            elif multiplicity > 0:
                 _elements[element] -= multiplicity
                 self._total -= multiplicity
             return old_multiplicity
@@ -988,9 +995,9 @@ class FrozenMultiset(BaseMultiset):
     def __hash__(self):
         return hash(tuple(sorted(self._elements.items())))
 
-Mapping.register(BaseMultiset)
-MutableMapping.register(Multiset)
+Mapping.register(BaseMultiset)  # type: ignore
+MutableMapping.register(Multiset)  # type: ignore
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod(exclude_empty=True)
+    doctest.testmod()

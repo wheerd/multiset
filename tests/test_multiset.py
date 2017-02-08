@@ -2,9 +2,13 @@
 import itertools
 import pytest
 import sys
+try:
+    from collections.abc import Iterable, Mapping, MutableMapping, Sized, Container
+except ImportError:
+    from collections import Iterable, Mapping, MutableMapping, Sized, Container
 
 import multiset
-from multiset import Multiset
+from multiset import Multiset, FrozenMultiset
 
 
 def test_missing():
@@ -62,6 +66,11 @@ def test_len(MultisetCls):
 
     m = MultisetCls('aa')
     assert len(m) == 2
+
+
+def test_bool(MultisetCls):
+    assert bool(MultisetCls()) is False
+    assert bool(MultisetCls('a')) is True
 
 
 @pytest.mark.parametrize(
@@ -284,9 +293,6 @@ def test_remove():
         m.remove('x')
 
     with pytest.raises(ValueError):
-        m.remove('a', 0)
-
-    with pytest.raises(ValueError):
         m.remove('a', -1)
 
     assert len(m) == 7
@@ -301,6 +307,13 @@ def test_remove():
     count = m.remove('b')
     assert 'b' not in m
     assert count == 2
+    assert len(m) == 4
+
+    assert 'a' in m
+    count = m.remove('a', 0)
+    assert 'a' in m
+    assert count == 4
+    assert m['a'] == 4
     assert len(m) == 4
 
     assert 'a' in m
@@ -321,9 +334,6 @@ def test_discard():
     m = Multiset('aaaabbc')
 
     with pytest.raises(ValueError):
-        m.discard('a', 0)
-
-    with pytest.raises(ValueError):
         m.discard('a', -1)
 
     assert len(m) == 7
@@ -338,6 +348,13 @@ def test_discard():
     count = m.discard('b')
     assert 'b' not in m
     assert count == 2
+    assert len(m) == 4
+
+    assert 'a' in m
+    count = m.discard('a', 0)
+    assert 'a' in m
+    assert count == 4
+    assert m['a'] == 4
     assert len(m) == 4
 
     assert 'a' in m
@@ -831,3 +848,12 @@ def test_mutating_dict_methods():
     assert ms.setdefault('b', 5) == 1
     assert ms.setdefault('c', 3) == 3
     assert ['b', 'c', 'c', 'c'] == sorted(ms)
+
+
+@pytest.mark.parametrize('parent', [Iterable, Mapping, Sized, Container])
+def test_instance_check(MultisetCls, parent):
+    assert isinstance(MultisetCls(), parent)
+
+
+def test_mutable_instance_check():
+    assert isinstance(Multiset(), MutableMapping)
