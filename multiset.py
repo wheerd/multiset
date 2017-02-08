@@ -585,6 +585,7 @@ class BaseMultiset:
 
 
 class Multiset(BaseMultiset):
+    """The mutable multiset variant."""
     __slots__ = ()
 
     def __setitem__(self, element, multiplicity):
@@ -990,6 +991,7 @@ class Multiset(BaseMultiset):
 
 
 class FrozenMultiset(BaseMultiset):
+    """The frozen multiset variant that is immutable and hashable."""
     __slots__ = ()
 
     def __hash__(self):
