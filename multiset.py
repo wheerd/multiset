@@ -105,6 +105,9 @@ class BaseMultiset:
         """
         return self._total
 
+    def __bool__(self):
+        return self._total > 0
+
     def __iter__(self):
         return chain.from_iterable(starmap(repeat, self._elements.items()))
 
