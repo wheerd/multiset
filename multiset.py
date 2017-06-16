@@ -607,7 +607,7 @@ class Multiset(BaseMultiset):
             raise TypeError('multiplicity must be an integer')
         _elements = self._elements
         if element in _elements:
-            old_multiplicity = _elements.get(element, 0)
+            old_multiplicity = _elements[element]
             if multiplicity > 0:
                 _elements[element] = multiplicity
                 self._total += multiplicity - old_multiplicity
