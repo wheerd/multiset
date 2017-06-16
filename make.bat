@@ -11,7 +11,7 @@ goto :eof
 goto :eof
 
 :test
-	py.test tests/ --doctest-modules multiset.py README.rst
+	py.test tests\ --doctest-modules multiset.py README.rst
 goto :eof
 
 :check
@@ -19,6 +19,5 @@ goto :eof
 goto :eof
 
 :coverage
-	coverage run --source multiset -m py.test
-	coverage report -m
+	py.test --cov=multiset --cov-report html --cov-report term tests\
 goto :eof

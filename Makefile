@@ -8,5 +8,4 @@ check:
 	pylint multiset
 
 coverage:
-	coverage run --source multiset -m py.test
-	coverage report -m
+	py.test --cov=multiset --cov-report html --cov-report term tests/

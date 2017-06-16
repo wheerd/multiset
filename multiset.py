@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
 
+import sys
 from collections import defaultdict
 try:
     from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
-except ImportError:
+except ImportError:  # pragma: no cover
     from collections import Iterable, Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
 
+if sys.version_info[0] < 3:
+    _int_type = (int, long)
+else:
+    _int_type = int
 
-class BaseMultiset:
+
+class BaseMultiset(object):
     """A multiset implementation.
 
     A multiset is similar to the builtin :class:`set`, but elements can occur multiple times in the multiset.
@@ -89,7 +95,7 @@ class BaseMultiset:
 
     def __repr__(self):
         items = ', '.join('%r: %r' % item for item in self._elements.items())
-        return '%s({%s})' % (type(self).__name__, items)
+        return '%s({%s})' % (self.__class__.__name__, items)
 
     def __len__(self):
         """Returns the total number of elements in the multiset.
@@ -198,7 +204,7 @@ class BaseMultiset:
         ['a', 'a', 'a', 'b']
 
         For a variant of the operation which modifies the multiset in place see
-        :meth:`union`.
+        :meth:`union_update`.
 
         Args:
             *others: The other sets to union the multiset with. Can also be any :class:`~typing.Iterable`\[~T]
@@ -387,6 +393,10 @@ class BaseMultiset:
         Args:
             factor: The factor to multiply each multiplicity with.
         """
+        if factor == 0:
+            return self.__class__()
+        if factor < 0:
+            raise ValueError('The factor must no be negative.')
         result = self.__copy__()
         _elements = result._elements
         for element in _elements:
@@ -395,7 +405,7 @@ class BaseMultiset:
         return result
 
     def __mul__(self, factor):
-        if not isinstance(factor, int):
+        if not isinstance(factor, _int_type):
             return NotImplemented
         return self.times(factor)
 
@@ -563,7 +573,7 @@ class BaseMultiset:
     def _as_multiset(cls, other):
         if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
-                raise TypeError("'%s' object is not iterable" % type(other))
+                raise TypeError("'%s' object is not iterable" % type(other))  # pragma: no cover
             return cls(other)
         return other
 
@@ -593,11 +603,11 @@ class Multiset(BaseMultiset):
 
         This will remove the element if the multiplicity is less than or equal to zero.
         '"""
-        if not isinstance(multiplicity, int):
+        if not isinstance(multiplicity, _int_type):
             raise TypeError('multiplicity must be an integer')
         _elements = self._elements
         if element in _elements:
-            old_multiplicity = _elements[element]
+            old_multiplicity = _elements.get(element, 0)
             if multiplicity > 0:
                 _elements[element] = multiplicity
                 self._total += multiplicity - old_multiplicity
@@ -609,7 +619,12 @@ class Multiset(BaseMultiset):
             self._total += multiplicity
 
     def __delitem__(self, element):
-        del self._elements[element]
+        _elements = self._elements
+        if element in _elements:
+            self._total -= _elements[element]
+            del _elements[element]
+        else:
+            raise KeyError("Could not delete {!r} from the multiset, because it is not in it.".format(element))
 
     def update(self, *others):
         r"""Like :meth:`dict.update` but add multiplicities instead of replacing them.
@@ -802,13 +817,19 @@ class Multiset(BaseMultiset):
         Args:
             factor: The factor to multiply each multiplicity with.
         """
-        if factor <= 0:
+        if factor < 0:
+            raise ValueError("The factor must not be negative.")
+        elif factor == 0:
             self.clear()
         else:
-            for element in self.distinct_elements():
-                self[element] *= factor
+            _elements = self._elements
+            for element in _elements:
+                _elements[element] *= factor
+            self._total *= factor
 
     def __imul__(self, factor):
+        if not isinstance(factor, _int_type):
+            raise TypeError("factor must be an integer.")
         self.times_update(factor)
         return self
 
@@ -883,7 +904,7 @@ class Multiset(BaseMultiset):
         _elements = self._elements
         if element not in _elements:
             raise KeyError
-        old_multiplicity = _elements[element]
+        old_multiplicity = _elements.get(element, 0)
         if multiplicity is None or multiplicity >= old_multiplicity:
             del _elements[element]
             self._total -= old_multiplicity
@@ -996,6 +1017,7 @@ class FrozenMultiset(BaseMultiset):
 
     def __hash__(self):
         return hash(tuple(sorted(self._elements.items())))
+
 
 Mapping.register(BaseMultiset)  # type: ignore
 MutableMapping.register(Multiset)  # type: ignore

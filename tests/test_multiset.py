@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable, Mapping, MutableMapping, Sized, Container
 
 import multiset
-from multiset import Multiset, FrozenMultiset
+from multiset import Multiset, FrozenMultiset, BaseMultiset
 
 
 def test_missing():
@@ -34,6 +34,9 @@ def test_iter(MultisetCls, iterable):
 def test_setitem():
     m = Multiset()
     assert len(m) == 0
+
+    with pytest.raises(TypeError):
+        m[1] = 'a'
 
     m[1] = 2
     assert m[1] == 2
@@ -252,11 +255,19 @@ def test_times_update(initial, factor, result):
     assert len(ms) == len(result)
 
 
+def test_times_update_error():
+    with pytest.raises(ValueError):
+        Multiset().times_update(-1)
+
+
 def test_imul():
     m = Multiset('aab')
 
     with pytest.raises(TypeError):
         m *= 'a'
+
+    with pytest.raises(ValueError):
+        m *= -1
 
     m *= 2
     assert sorted(m) == list('aaaabb')
@@ -330,6 +341,30 @@ def test_remove():
     assert len(m) == 1
 
 
+def test_delitem():
+    m = Multiset('aaaabbc')
+
+    with pytest.raises(KeyError):
+        del m['x']
+
+    assert len(m) == 7
+
+    assert 'c' in m
+    del m['c']
+    assert 'c' not in m
+    assert len(m) == 6
+
+    assert 'b' in m
+    del m['b']
+    assert 'b' not in m
+    assert len(m) == 4
+
+    assert 'a' in m
+    del m['a']
+    assert 'a' not in m
+    assert len(m) == 0
+
+
 def test_discard():
     m = Multiset('aaaabbc')
 
@@ -372,23 +407,25 @@ def test_discard():
 
 
 @pytest.mark.parametrize(
-    '   set1,       set2,   disjoint',
+    '   set1,       set2,           disjoint',
     [
-        ('aab',     'a',    False),
-        ('aab',     'ab',   False),
-        ('a',       'aab',  False),
-        ('ab',      'aab',  False),
-        ('aab',     'c',    True),
-        ('aab',     '',     True),
-        ('',        'abc',  True),
+        ('aab',     'a',            False),
+        ('aab',     'ab',           False),
+        ('a',       'aab',          False),
+        ('aab',     'c',            True),
+        ('aab',     '',             True),
+        ('',        'abc',          True),
     ]
 )  # yapf: disable
 def test_isdisjoint(MultisetCls, set1, set2, disjoint):
     ms = MultisetCls(set1)
+
     if disjoint:
         assert ms.isdisjoint(set2)
+        assert ms.isdisjoint(iter(set2))
     else:
         assert not ms.isdisjoint(set2)
+        assert not ms.isdisjoint(iter(set2))
 
 
 
@@ -594,16 +631,23 @@ def test_xor(MultisetCls):
         ('aab',     2,                    list('aaaabb')),
         ('a',       3,                    list('aaa')),
         ('abc',     0,                    list()),
-        ('abc',     1,                    list('abc'))
+        ('abc',     1,                    list('abc')),
     ]
 )  # yapf: disable
 def test_times(MultisetCls, initial, factor, expected):
     ms = MultisetCls(initial)
+
     result = ms.times(factor)
+
     assert sorted(result) == expected
     assert len(result) == len(expected)
     assert isinstance(result, MultisetCls)
     assert result is not ms
+
+
+def test_times_error(MultisetCls):
+    with pytest.raises(ValueError):
+        _ = MultisetCls().times(-1)
 
 
 def test_mul(MultisetCls):
@@ -776,12 +820,13 @@ def test_eq_set(MultisetCls):
                 assert not s == ms
 
 
-def test_eq(MultisetCls):
-    assert not MultisetCls('ab') == MultisetCls('b')
-    assert not MultisetCls('ab') == MultisetCls('a')
-    assert MultisetCls('ab') == MultisetCls('ab')
-    assert MultisetCls('aab') == MultisetCls('aab')
-    assert not MultisetCls('aab') == MultisetCls('abb')
+@pytest.mark.parametrize('MultisetCls2', [Multiset, FrozenMultiset])
+def test_eq(MultisetCls, MultisetCls2):
+    assert not MultisetCls('ab') == MultisetCls2('b')
+    assert not MultisetCls('ab') == MultisetCls2('a')
+    assert MultisetCls('ab') == MultisetCls2('ab')
+    assert MultisetCls('aab') == MultisetCls2('aab')
+    assert not MultisetCls('aab') == MultisetCls2('abb')
     assert not MultisetCls('ab') == 'ab'
 
 
@@ -801,12 +846,13 @@ def test_ne_set(MultisetCls):
                 assert s != ms
 
 
-def test_ne(MultisetCls):
-    assert MultisetCls('ab') != MultisetCls('b')
-    assert MultisetCls('ab') != MultisetCls('a')
-    assert not MultisetCls('ab') != MultisetCls('ab')
-    assert not MultisetCls('aab') != MultisetCls('aab')
-    assert MultisetCls('aab') != MultisetCls('abb')
+@pytest.mark.parametrize('MultisetCls2', [Multiset, FrozenMultiset])
+def test_ne(MultisetCls, MultisetCls2):
+    assert MultisetCls('ab') != MultisetCls2('b')
+    assert MultisetCls('ab') != MultisetCls2('a')
+    assert not MultisetCls('ab') != MultisetCls2('ab')
+    assert not MultisetCls('aab') != MultisetCls2('aab')
+    assert MultisetCls('aab') != MultisetCls2('abb')
     assert MultisetCls('ab') != 'ab'
 
 
@@ -857,3 +903,62 @@ def test_instance_check(MultisetCls, parent):
 
 def test_mutable_instance_check():
     assert isinstance(Multiset(), MutableMapping)
+
+
+@pytest.mark.parametrize(
+    '   elements,   items',
+    [
+        ('',        []),
+        ('a',       [('a', 1)]),
+        ('ab',      [('a', 1), ('b', 1)]),
+        ('aab',     [('a', 2), ('b', 1)]),
+    ]
+)  # yapf: disable
+def test_items(MultisetCls, elements, items):
+    ms = MultisetCls(elements)
+
+    assert sorted(ms.items()) == items
+
+
+@pytest.mark.parametrize(
+    '   elements,   distinct_elements',
+    [
+        ('',        []),
+        ('a',       ['a']),
+        ('ab',      ['a', 'b']),
+        ('aab',     ['a', 'b']),
+        ('aabbb',   ['a', 'b']),
+    ]
+)  # yapf: disable
+def test_distinct_elements(MultisetCls, elements, distinct_elements):
+    ms = MultisetCls(elements)
+
+    assert sorted(ms.distinct_elements()) == distinct_elements
+
+
+@pytest.mark.parametrize(
+    '   elements,   multiplicities',
+    [
+        ('',        []),
+        ('a',       [1]),
+        ('ab',      [1, 1]),
+        ('aab',     [1, 2]),
+        ('aabbb',   [2, 3]),
+    ]
+)  # yapf: disable
+def test_multiplicities(MultisetCls, elements, multiplicities):
+    ms = MultisetCls(elements)
+
+    assert sorted(ms.multiplicities()) == multiplicities
+
+
+def test_base_error():
+    with pytest.raises(TypeError):
+        _ = BaseMultiset()
+
+
+def test_frozen_hash_equal():
+    ms1 = FrozenMultiset('ab')
+    ms2 = FrozenMultiset('ab')
+
+    assert hash(ms1) == hash(ms2)
