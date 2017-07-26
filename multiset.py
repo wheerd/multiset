@@ -11,8 +11,16 @@ from itertools import chain, repeat, starmap
 
 if sys.version_info[0] < 3:
     _int_type = (int, long)
+    _sequence_types = (tuple, list, set, frozenset, str)
+    _iter_types = (type(iter([])), type((lambda: (yield))()))
 else:
     _int_type = int
+    _sequence_types = (tuple, list, range, set, frozenset, str)
+    _iter_types = (type(iter([])), type((lambda: (yield))()))
+
+_all_basic_types = _sequence_types + _iter_types + (dict, )
+
+__all__ = ['BaseMultiset', 'Multiset', 'FrozenMultiset']
 
 
 class BaseMultiset(object):
@@ -63,7 +71,20 @@ class BaseMultiset(object):
             self._elements = _elements = defaultdict(int)
             _total = 0
             if iterable is not None:
-                if isinstance(iterable, Mapping):
+                if isinstance(iterable, _sequence_types):
+                    for element in iterable:
+                        _elements[element] += 1
+                    _total = len(iterable)
+                elif isinstance(iterable, dict):
+                    for element, multiplicity in iterable.items():
+                        if multiplicity > 0:
+                            _elements[element] = multiplicity
+                            _total += multiplicity
+                elif isinstance(iterable, _iter_types):
+                    for element in iterable:
+                        _elements[element] += 1
+                        _total += 1
+                elif isinstance(iterable, Mapping):
                     for element, multiplicity in iterable.items():
                         if multiplicity > 0:
                             _elements[element] = multiplicity
@@ -139,7 +160,9 @@ class BaseMultiset(object):
             other: The other set to check disjointedness. Can also be an :class:`~typing.Iterable`\[~T]
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
-        if not isinstance(other, Container):
+        if isinstance(other, _sequence_types + (BaseMultiset, )):
+            pass
+        elif not isinstance(other, Container):
             other = self._as_multiset(other)
         return all(element not in other for element in self._elements.keys())
 
@@ -185,7 +208,9 @@ class BaseMultiset(object):
         return result
 
     def __sub__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self.difference(other)
 
@@ -226,7 +251,9 @@ class BaseMultiset(object):
         return result
 
     def __or__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self.union(other)
 
@@ -273,7 +300,9 @@ class BaseMultiset(object):
         return result
 
     def __add__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self.combine(other)
 
@@ -320,7 +349,9 @@ class BaseMultiset(object):
         return result
 
     def __and__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self.intersection(other)
 
@@ -369,7 +400,9 @@ class BaseMultiset(object):
         return result
 
     def __xor__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self.symmetric_difference(other)
 
@@ -449,12 +482,16 @@ class BaseMultiset(object):
         return self._issubset(other, False)
 
     def __le__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self._issubset(other, False)
 
     def __lt__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self._issubset(other, True)
 
@@ -498,29 +535,37 @@ class BaseMultiset(object):
         return self._issuperset(other, False)
 
     def __ge__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self._issuperset(other, False)
 
     def __gt__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         return self._issuperset(other, True)
 
     def __eq__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
-            return NotImplemented
         if isinstance(other, BaseMultiset):
             return self._total == other._total and self._elements == other._elements
+        if isinstance(other, (set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
+            return NotImplemented
         if self._total != len(other):
             return False
         return self._issubset(other, False)
 
     def __ne__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
-            return NotImplemented
         if isinstance(other, BaseMultiset):
             return self._total != other._total or self._elements != other._elements
+        if isinstance(other, (set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
+            return NotImplemented
         if self._total != len(other):
             return True
         return not self._issubset(other, False)
@@ -571,19 +616,25 @@ class BaseMultiset(object):
 
     @classmethod
     def _as_multiset(cls, other):
-        if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                raise TypeError("'%s' object is not iterable" % type(other))  # pragma: no cover
-            return cls(other)
-        return other
+        if isinstance(other, BaseMultiset):
+            return other
+        if isinstance(other, _all_basic_types):
+            pass
+        elif not isinstance(other, Iterable):
+            raise TypeError("'%s' object is not iterable" % type(other))  # pragma: no cover
+        return cls(other)
 
     @staticmethod
     def _as_mapping(iterable):
         if isinstance(iterable, BaseMultiset):
             return iterable._elements
-        if isinstance(iterable, Mapping):
+        if isinstance(iterable, dict):
             return iterable
-        if not isinstance(iterable, Iterable):
+        if isinstance(iterable, _all_basic_types):
+            pass  # create dictionary below
+        elif isinstance(iterable, Mapping):
+            return iterable
+        elif not isinstance(iterable, Iterable):
             raise TypeError("'%s' object is not iterable" % type(iterable))
         mapping = dict()
         for element in iterable:
@@ -687,7 +738,9 @@ class Multiset(BaseMultiset):
         self._total = _total
 
     def __ior__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         self.union_update(other)
         return self
@@ -722,7 +775,9 @@ class Multiset(BaseMultiset):
                     self[element] = multiplicity
 
     def __iand__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         self.intersection_update(other)
         return self
@@ -755,7 +810,9 @@ class Multiset(BaseMultiset):
                 self.discard(element, multiplicity)
 
     def __isub__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         self.difference_update(other)
         return self
@@ -791,7 +848,9 @@ class Multiset(BaseMultiset):
             self[element] = (multiplicity - other_count if multiplicity > other_count else other_count - multiplicity)
 
     def __ixor__(self, other):
-        if not isinstance(other, (Set, BaseMultiset)):
+        if isinstance(other, (BaseMultiset, set, frozenset)):
+            pass
+        elif not isinstance(other, Set):
             return NotImplemented
         self.symmetric_difference_update(other)
         return self
