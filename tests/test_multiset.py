@@ -974,14 +974,14 @@ def test_can_be_pickled():
     assert fms == unpickled
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Dictionary insertion order is not kept in Python 2")
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="Dictionary insertion order is not kept previous to Python 3.6")
 def test_str():
     ms = Multiset('aabc')
 
     assert str(ms) == '{a, a, b, c}'
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Dictionary insertion order is not kept in Python 2")
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="Dictionary insertion order is not kept previous to Python 3.6")
 def test_repr():
     ms = Multiset('aabc')
 
