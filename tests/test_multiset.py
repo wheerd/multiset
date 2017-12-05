@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+import pickle
 import pytest
 import sys
 try:
@@ -962,3 +963,26 @@ def test_frozen_hash_equal():
     ms2 = FrozenMultiset('ab')
 
     assert hash(ms1) == hash(ms2)
+
+
+def test_can_be_pickled():
+    fms = FrozenMultiset('aabcd')
+
+    pickled = pickle.dumps(fms)
+    unpickled = pickle.loads(pickled)
+
+    assert fms == unpickled
+
+
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Dictionary insertion order is not kept in Python 2")
+def test_str():
+    ms = Multiset('aabc')
+
+    assert str(ms) == '{a, a, b, c}'
+
+
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Dictionary insertion order is not kept in Python 2")
+def test_repr():
+    ms = Multiset('aabc')
+
+    assert repr(ms) == "Multiset({'a': 2, 'b': 1, 'c': 1})"

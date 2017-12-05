@@ -112,7 +112,7 @@ class BaseMultiset(object):
         return self._elements.get(element, 0)
 
     def __str__(self):
-        return '{%s}' % ', '.join(map(str, self))
+        return '{%s}' % ', '.join(map(str, self.__iter__()))
 
     def __repr__(self):
         items = ', '.join('%r: %r' % item for item in self._elements.items())
@@ -644,6 +644,11 @@ class BaseMultiset(object):
                 mapping[element] = 1
         return mapping
 
+    def __getstate__(self):
+        return self._total, self._elements
+
+    def __setstate__(self, state):
+        self._total, self._elements = state
 
 class Multiset(BaseMultiset):
     """The mutable multiset variant."""
