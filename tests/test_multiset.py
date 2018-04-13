@@ -589,6 +589,18 @@ def test_sub(MultisetCls):
     assert result is not ms
 
 
+def test_rsub(MultisetCls):
+    ms = MultisetCls('abc')
+
+    with pytest.raises(TypeError):
+        _ = 'abc' - ms
+
+    result = set('abd') - ms
+    assert sorted(result) == list('d')
+    assert isinstance(result, MultisetCls)
+    assert result is not ms
+
+
 @pytest.mark.parametrize(
     '   initial,    other,                expected',
     [
@@ -986,3 +998,13 @@ def test_repr():
     ms = Multiset('aabc')
 
     assert repr(ms) == "Multiset({'a': 2, 'b': 1, 'c': 1})"
+
+
+def test_multiplicities(MultisetCls):
+    ms = MultisetCls('aaabbc')
+    assert sorted(ms.multiplicities()) == [1, 2, 3]
+
+
+def test_distinct_elements(MultisetCls):
+    ms = MultisetCls('aaabbc')
+    assert sorted(ms.distinct_elements()) == list('abc')
