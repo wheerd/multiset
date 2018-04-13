@@ -183,6 +183,11 @@ class BaseMultiset:
             return NotImplemented
         return self.difference(other)
 
+    def __rsub__(self, other):
+        if not isinstance(other, (Set, BaseMultiset)):
+            return NotImplemented
+        return self._as_multiset(other).difference(self)
+
     def union(self, *others):
         r"""Return a new multiset with all elements from the multiset and the others with maximal multiplicities.
 
@@ -558,6 +563,8 @@ class BaseMultiset:
 
     def multiplicities(self):
         return self._elements.values()
+
+    values = multiplicities
 
     @classmethod
     def _as_multiset(cls, other):
