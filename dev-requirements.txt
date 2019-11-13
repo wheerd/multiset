@@ -1,4 +1,4 @@
-Sphinx>=1.5,<2
+Sphinx>=1.5,<3
 pylint>=1.6,<2
 pytest>=3.0,<4
 coverage>=4.3,<5
