@@ -9,7 +9,7 @@ Overview
 --------
 
 A multiset is similar to the builtin set_, but it allows an element to occur multiple times.
-It is an unordered collection of element which have to be hashable just like in a set_.
+It is an unordered collection of elements which have to be hashable just like in a set_.
 It supports the same methods and operations as set_ does, e.g. membership test, union, intersection, and
 (symmetric) difference::
 
