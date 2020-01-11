@@ -15,5 +15,5 @@ dependencies:
   - pylint
   - pytest
   - pytest-cov
-  - git+https://github.com/wheerd/sphinx-autodoc-typehints.git@napoleon-master#egg=sphinx-autodoc-napoleon-typehints
+  - sphinx-autodoc-typehints
   - setuptools_scm
