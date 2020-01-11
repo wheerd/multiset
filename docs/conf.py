@@ -40,8 +40,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx_autodoc_napoleon_typehints',
     'sphinx.ext.napoleon',
+    'sphinx-autodoc-typehints'
     'alabaster',
 ]
 
