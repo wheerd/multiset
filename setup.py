@@ -38,6 +38,12 @@ setup(
     tests_require=[
         'pytest>=3.0',
     ],
+    extras_require={
+        'docs': [
+            'Sphinx>=1.5,<2',
+            'sphinx-autodoc-typehints>=1.11.1<2.0'
+        ]
+    },
     include_package_data=True,
 )
 
