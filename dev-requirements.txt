@@ -1,4 +1,4 @@
-pylint>=1.6,<2
+pylint>=1.6,<3
 pytest>=3.0,<7
 coverage>=4.3,<6
 setuptools_scm>=1.15,<6.0
