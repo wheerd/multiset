@@ -23,12 +23,8 @@ jobs:
         if: matrix.python-version == 'disabled'
       - name: Run tests
         run: make test
-        if: matrix.python-version != '3.6'
-      - name: Run tests
-        run: make coverage
-        if: matrix.python-version == '3.6'
       - name: Upload coverage
-        run: pip install coveralls && coveralls
+        run: pip install coveralls && make coverage && coveralls
         if: matrix.python-version == '3.6'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
