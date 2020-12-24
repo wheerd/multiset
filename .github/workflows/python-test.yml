@@ -20,7 +20,7 @@ jobs:
         run: make init
       - name: Lint
         run: make check
-        if: matrix.python-version == '3.6'
+        if: matrix.python-version == 'disabled'
       - name: Run tests
         run: make test
         if: matrix.python-version != '3.6'
