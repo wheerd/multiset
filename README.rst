@@ -90,8 +90,8 @@ Licensed under the MIT_ license.
     :target: https://coveralls.io/github/wheerd/multiset?branch=master
     :alt: Test coverage
 
-.. |build| image:: https://travis-ci.org/wheerd/multiset.svg?branch=master
-    :target: https://travis-ci.org/wheerd/multiset
+.. |build| image:: https://github.com/wheerd/multiset/workflows/Tests/badge.svg?branch=master
+    :target: https://github.com/wheerd/multiset/actions?query=workflow%3ATests
     :alt: Build status of the master branch
 
 .. |docs| image:: https://readthedocs.org/projects/multiset/badge/?version=latest
