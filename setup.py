@@ -32,11 +32,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     setup_requires=[
-        'setuptools_scm >= 1.7.0',
-        'pytest-runner',
-    ],
-    tests_require=[
-        'pytest>=3.0',
+        'setuptools_scm>=1.15,<2.0'
     ],
     extras_require={
         'docs': [
