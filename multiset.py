@@ -1087,7 +1087,7 @@ class FrozenMultiset(BaseMultiset):
     __slots__ = ()
 
     def __hash__(self):
-        return hash(tuple(sorted(self._elements.items())))
+        return sum(hash(item) for item in self._elements.items())
 
 
 Mapping.register(BaseMultiset)  # type: ignore
