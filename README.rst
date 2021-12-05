@@ -74,11 +74,11 @@ Licensed under the MIT_ license.
 
 
 .. _multiset: https://en.wikipedia.org/wiki/Multiset
-.. _set: https://docs.python.org/3.5/library/stdtypes.html#set-types-set-frozenset
+.. _set: https://docs.python.org/3.10/library/stdtypes.html#set-types-set-frozenset
 .. _sets: set_
 .. _frozenset: set_
-.. _dict: https://docs.python.org/3.5/library/stdtypes.html#mapping-types-dict
-.. _`collections.Counter`: https://docs.python.org/3.5/library/collections.html#collections.Counter
+.. _dict: https://docs.python.org/3.10/library/stdtypes.html#mapping-types-dict
+.. _`collections.Counter`: https://docs.python.org/3.10/library/collections.html#collections.Counter
 .. _MIT: https://opensource.org/licenses/MIT
 
 
