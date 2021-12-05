@@ -2,14 +2,14 @@ name: Dependabot Tests
 
 on:
   pull_request_target
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' }}
     strategy:
       matrix:
-        python-version: [ '2.x', '3.6', '3.7', '3.8', '3.9' ]
+        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
     name: Run tests
     steps:
       - uses: actions/checkout@v2

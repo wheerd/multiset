@@ -710,7 +710,6 @@ def test_le(MultisetCls):
     assert not set3 <= set1
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
 def test_le_error(MultisetCls):
     with pytest.raises(TypeError):
         MultisetCls('ab') <= 'x'
@@ -729,7 +728,6 @@ def test_lt(MultisetCls):
     assert not set3 <= set1
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
 def test_lt_error(MultisetCls):
     with pytest.raises(TypeError):
         MultisetCls('ab') < 'x'
@@ -775,7 +773,6 @@ def test_ge(MultisetCls):
     assert set3 >= set3
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
 def test_ge_error(MultisetCls):
     with pytest.raises(TypeError):
         MultisetCls('ab') >= 'x'
@@ -799,7 +796,6 @@ def test_gt(MultisetCls):
     assert not set3 > set3
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="Comparison is broken in Python 2")
 def test_gt_error(MultisetCls):
     with pytest.raises(TypeError):
         MultisetCls('ab') > 'x'
@@ -986,14 +982,12 @@ def test_can_be_pickled():
     assert fms == unpickled
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="Dictionary insertion order is not kept previous to Python 3.6")
 def test_str():
     ms = Multiset('aabc')
 
     assert str(ms) == '{a, a, b, c}'
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="Dictionary insertion order is not kept previous to Python 3.6")
 def test_repr():
     ms = Multiset('aabc')
 
