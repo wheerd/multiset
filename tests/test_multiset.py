@@ -968,10 +968,9 @@ def test_base_error():
 
 def test_frozen_hash_equal():
     ms1 = FrozenMultiset('ab')
-    ms2 = FrozenMultiset('ab')
+    ms2 = FrozenMultiset('ba')
 
     assert hash(ms1) == hash(ms2)
-
 
 def test_can_be_pickled():
     fms = FrozenMultiset('aabcd')
