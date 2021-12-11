@@ -365,7 +365,7 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}
 
 napoleon_use_param = True
 napoleon_use_ivar = False

@@ -3,20 +3,11 @@
 
 import sys
 from collections import defaultdict
-try:
-    from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
-except ImportError:  # pragma: no cover
-    from collections import Iterable, Mapping, MutableMapping, Set, Sized, Container
+from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
 
-if sys.version_info[0] < 3:
-    _int_type = (int, long)
-    _sequence_types = (tuple, list, set, frozenset, str)
-    _iter_types = (type(iter([])), type((lambda: (yield))()))
-else:
-    _int_type = int
-    _sequence_types = (tuple, list, range, set, frozenset, str)
-    _iter_types = (type(iter([])), type((lambda: (yield))()))
+_sequence_types = (tuple, list, range, set, frozenset, str)
+_iter_types = (type(iter([])), type((lambda: (yield))()))
 
 _all_basic_types = _sequence_types + _iter_types + (dict, )
 
@@ -443,7 +434,7 @@ class BaseMultiset(object):
         return result
 
     def __mul__(self, factor):
-        if not isinstance(factor, _int_type):
+        if not isinstance(factor, int):
             return NotImplemented
         return self.times(factor)
 
@@ -666,7 +657,7 @@ class Multiset(BaseMultiset):
 
         This will remove the element if the multiplicity is less than or equal to zero.
         '"""
-        if not isinstance(multiplicity, _int_type):
+        if not isinstance(multiplicity, int):
             raise TypeError('multiplicity must be an integer')
         _elements = self._elements
         if element in _elements:
@@ -899,7 +890,7 @@ class Multiset(BaseMultiset):
             self._total *= factor
 
     def __imul__(self, factor):
-        if not isinstance(factor, _int_type):
+        if not isinstance(factor, int):
             raise TypeError("factor must be an integer.")
         self.times_update(factor)
         return self
@@ -1087,8 +1078,7 @@ class FrozenMultiset(BaseMultiset):
     __slots__ = ()
 
     def __hash__(self):
-        return hash(tuple(sorted(self._elements.items())))
-
+        return hash(frozenset(self._elements.items()))
 
 Mapping.register(BaseMultiset)  # type: ignore
 MutableMapping.register(Multiset)  # type: ignore
