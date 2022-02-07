@@ -1,5 +1,5 @@
 pylint>=1.6,<3
-pytest>=3.0,<7
+pytest>=3.0,<8
 coverage>=4.3,<7
 setuptools_scm>=1.15,<7.0
 tox>=2.5,<4.0
