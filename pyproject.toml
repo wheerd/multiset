@@ -7,6 +7,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
+name = "multiset"
 dynamic = ["version"]
 
 [tool.setuptools_scm]
