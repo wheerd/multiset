@@ -895,18 +895,18 @@ def test_dict_methods(MultisetCls):
 
 def test_mutating_dict_methods():
     ms = Multiset('aab')
-    initial_size = len(ms)
+    assert len(ms) == len('aab')
 
     assert ms.pop('a', 5) == 2
-    assert len(ms) == initial_size - 2
+    assert len(ms) == len('b')
     assert ms.pop('c', 3) == 3
-    assert len(ms) == initial_size - 2
+    assert len(ms) == len('b')
     assert ['b'] == sorted(ms)
 
     assert ms.setdefault('b', 5) == 1
-    assert len(ms) == initial_size - 2
+    assert len(ms) == len('b')
     assert ms.setdefault('c', 3) == 3
-    assert len(ms) == initial_size + 1
+    assert len(ms) == len('bccc')
     assert ['b', 'c', 'c', 'c'] == sorted(ms)
 
 
