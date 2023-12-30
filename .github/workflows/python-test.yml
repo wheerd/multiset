@@ -30,8 +30,20 @@ jobs:
       - name: Run tests
         run: make test
       - name: Upload coverage
-        run: pip install coveralls && make coverage && coveralls --service=github-actions
-        if: matrix.python-version == '3.8'
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          GITHUB_TOKEN: $COVERALLS_REPO_TOKEN
+        run: make coverage
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
+          
+  finish:
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v2
+      with:
+        parallel-finished: true
+        carryforward: "run-3.8"
