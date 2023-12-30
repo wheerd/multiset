@@ -26,7 +26,7 @@ jobs:
         run: make init
       - name: Lint
         run: make check
-        if: matrix.python-version == 'disabled'
+        if: matrix.python-version == '3.8'
       - name: Run tests
         run: make test
       - name: Upload coverage
@@ -36,7 +36,7 @@ jobs:
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
-          
+
   finish:
     needs: build
     if: ${{ always() }}
