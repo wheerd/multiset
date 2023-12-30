@@ -27,7 +27,7 @@ documentation = "https://multiset.readthedocs.io/"
 authors = [
     {name = "Manuel Krebber", email = "admin@wheerd.de"},
 ]
-readme = {file = ["README.rst"], content-type="text/x-rst"}
+readme = {file = "README.rst", content-type="text/x-rst"}
 dynamic = ["version"]
 
 [tool.setuptools_scm]
