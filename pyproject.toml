@@ -8,6 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multiset"
+requires-python = ">=3.7"
 description = "An implementation of a multiset."
 license = {text = "MIT"}
 classifiers = [
