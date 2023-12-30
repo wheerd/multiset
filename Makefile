@@ -8,4 +8,4 @@ check:
 	pylint multiset
 
 coverage:
-	py.test --cov=multiset --cov-report html --cov-report term tests/
+	py.test --cov=multiset --cov-report lcov --cov-report term-missing tests/
