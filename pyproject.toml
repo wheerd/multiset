@@ -21,9 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
-home-page = "https://github.com/wheerd/multiset"
-repository = "https://github.com/wheerd/multiset"
-documentation = "https://multiset.readthedocs.io/"
 authors = [
     {name = "Manuel Krebber", email = "admin@wheerd.de"},
 ]
