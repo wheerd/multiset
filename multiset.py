@@ -1050,6 +1050,9 @@ class Multiset(BaseMultiset):
         Returns:
             The multiplicity for *element* if it is in the multiset, else *default*.
         """
+        rm_size = self._elements.get(element)
+        if rm_size != None:
+            self._total -= rm_size
         return self._elements.pop(element, default)
 
     def setdefault(self, element, default):
@@ -1065,6 +1068,12 @@ class Multiset(BaseMultiset):
         Returns:
             The multiplicity for *element* if it is in the multiset, else *default*.
         """
+
+        mul = self._elements.get(element)
+        if mul == None:
+            if default < 1:
+                raise ValueError("Multiplicity must be positive")
+            self._total += default
         return self._elements.setdefault(element, default)
 
     def clear(self):
