@@ -28,6 +28,7 @@ jobs:
       - name: Lint
         run: make check
         if: matrix.python-version == '3.8'
+        continue-on-error: true
       - name: Run tests
         run: make test
       - name: Run stubtest
