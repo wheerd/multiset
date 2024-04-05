@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multiset"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 description = "An implementation of a multiset."
 license = {text = "MIT"}
 classifiers = [
@@ -17,10 +17,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 authors = [
     {name = "Manuel Krebber", email = "admin@wheerd.de"},
