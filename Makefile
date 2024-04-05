@@ -2,7 +2,7 @@ init:
 	pip install -r dev-requirements.txt
 
 test:
-	py.test tests/ --doctest-modules multiset.py README.rst
+	py.test tests/ --doctest-modules multiset/multiset.py README.rst
 
 check:
 	pylint multiset
