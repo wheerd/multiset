@@ -4,6 +4,7 @@ if /I %1 == test goto :test
 if /I %1 == stubtest goto :stubtest
 if /I %1 == check goto :check
 if /I %1 == coverage goto :coverage
+if /I %1 == build goto :build
 
 goto :eof
 
@@ -26,4 +27,8 @@ goto :eof
 
 :coverage
 	py.test --cov=multiset --cov-report lcov --cov-report term-missing tests/
+goto :eof
+
+:build
+	python -m build
 goto :eof

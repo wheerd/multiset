@@ -33,6 +33,8 @@ jobs:
         run: make test
       - name: Run stubtest
         run: make stubtest
+      - name: Build
+        run: make build
       - name: Upload coverage
         run: make coverage
       - name: Coveralls Parallel

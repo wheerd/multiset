@@ -12,3 +12,6 @@ check:
 
 coverage:
 	py.test --cov=multiset --cov-report lcov --cov-report term-missing tests/
+
+build:
+	python -m build
