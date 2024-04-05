@@ -11,7 +11,7 @@ goto :eof
 goto :eof
 
 :test
-	py.test tests\ --doctest-modules multiset.py README.rst
+	py.test tests\ --doctest-modules multiset/multiset.py README.rst
 goto :eof
 
 :check
