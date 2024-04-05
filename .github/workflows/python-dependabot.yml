@@ -1,7 +1,6 @@
 name: Dependabot Tests
 
-on:
-  pull_request_target
+on: pull_request_target
 
 jobs:
   build:
@@ -9,13 +8,12 @@ jobs:
     if: ${{ github.actor == 'dependabot[bot]' }}
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     name: Run tests
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup python
         uses: actions/setup-python@v2
         with:
