@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
-
-import sys
+from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional,
+                    Type, ItemsView, KeysView, ValuesView, MutableMapping as MutableMap)
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
@@ -13,8 +13,12 @@ _all_basic_types = _sequence_types + _iter_types + (dict, )
 
 __all__ = ['BaseMultiset', 'Multiset', 'FrozenMultiset']
 
+_TElement = TypeVar('_TElement', bound=Hashable)
+_OtherType = Union[Iterable[_TElement], Mapping[_TElement, int]]
+_Self = TypeVar('_Self', bound='BaseMultiset')
 
-class BaseMultiset(object):
+
+class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
     """A multiset implementation.
 
     A multiset is similar to the builtin :class:`set`, but elements can occur multiple times in the multiset.
@@ -38,7 +42,7 @@ class BaseMultiset(object):
 
     __slots__ = ('_elements', '_total')
 
-    def __init__(self, iterable=None):
+    def __init__(self, iterable: Optional[_OtherType] = None):
         r"""Create a new, empty Multiset object.
 
         And if given, initialize with elements from input iterable.
@@ -95,21 +99,21 @@ class BaseMultiset(object):
             raise TypeError("Cannot instantiate BaseMultiset directly, use either Multiset or FrozenMultiset.")
         return super(BaseMultiset, cls).__new__(cls)
 
-    def __contains__(self, element):
+    def __contains__(self, element: object) -> bool:
         return element in self._elements
 
-    def __getitem__(self, element):
+    def __getitem__(self, element: _TElement) -> int:
         """The multiplicity of an element or zero if it is not in the multiset."""
         return self._elements.get(element, 0)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{%s}' % ', '.join(map(str, self.__iter__()))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         items = ', '.join('%r: %r' % item for item in self._elements.items())
         return '%s({%s})' % (self.__class__.__name__, items)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Returns the total number of elements in the multiset.
 
         Note that this is equivalent to the sum of the multiplicities:
@@ -130,13 +134,13 @@ class BaseMultiset(object):
         """
         return self._total
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self._total > 0
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[_TElement]:
         return chain.from_iterable(starmap(repeat, self._elements.items()))
 
-    def isdisjoint(self, other):
+    def isdisjoint(self, other: _OtherType) -> bool:
         r"""Return True if the set has no elements in common with other.
 
         Sets are disjoint iff their intersection is the empty set.
@@ -157,7 +161,7 @@ class BaseMultiset(object):
             other = self._as_multiset(other)
         return all(element not in other for element in self._elements.keys())
 
-    def difference(self, *others):
+    def difference(self: _Self, *others: _OtherType) -> _Self:
         r"""Return a new multiset with all elements from the others removed.
 
         >>> ms = Multiset('aab')
@@ -198,19 +202,19 @@ class BaseMultiset(object):
         result._total = _total
         return result
 
-    def __sub__(self, other):
+    def __sub__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self.difference(other)
 
-    def __rsub__(self, other):
+    def __rsub__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if not isinstance(other, (Set, BaseMultiset)):
             return NotImplemented
         return self._as_multiset(other).difference(self)
 
-    def union(self, *others):
+    def union(self: _Self, *others: _OtherType) -> _Self:
         r"""Return a new multiset with all elements from the multiset and the others with maximal multiplicities.
 
         >>> ms = Multiset('aab')
@@ -246,7 +250,7 @@ class BaseMultiset(object):
         result._total = _total
         return result
 
-    def __or__(self, other):
+    def __or__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -255,7 +259,7 @@ class BaseMultiset(object):
 
     __ror__ = __or__
 
-    def combine(self, *others):
+    def combine(self: _Self, *others: _OtherType) -> _Self:
         r"""Return a new multiset with all elements from the multiset and the others with their multiplicities summed up.
 
         >>> ms = Multiset('aab')
@@ -295,7 +299,7 @@ class BaseMultiset(object):
         result._total = _total
         return result
 
-    def __add__(self, other):
+    def __add__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -304,7 +308,7 @@ class BaseMultiset(object):
 
     __radd__ = __add__
 
-    def intersection(self, *others):
+    def intersection(self: _Self, *others: _OtherType) -> _Self:
         r"""Return a new multiset with elements common to the multiset and all others.
 
         >>> ms = Multiset('aab')
@@ -344,7 +348,7 @@ class BaseMultiset(object):
         result._total = _total
         return result
 
-    def __and__(self, other):
+    def __and__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -353,7 +357,7 @@ class BaseMultiset(object):
 
     __rand__ = __and__
 
-    def symmetric_difference(self, other):
+    def symmetric_difference(self: _Self, other: _OtherType) -> _Self:
         r"""Return a new set with elements in either the set or other but not both.
 
         >>> ms = Multiset('aab')
@@ -395,7 +399,7 @@ class BaseMultiset(object):
         result._total = _total
         return result
 
-    def __xor__(self, other):
+    def __xor__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -404,7 +408,7 @@ class BaseMultiset(object):
 
     __rxor__ = __xor__
 
-    def times(self, factor):
+    def times(self: _Self, factor: int) -> _Self:
         """Return a new set with each element's multiplicity multiplied with the given scalar factor.
 
         >>> ms = Multiset('aab')
@@ -433,14 +437,14 @@ class BaseMultiset(object):
         result._total *= factor
         return result
 
-    def __mul__(self, factor):
+    def __mul__(self: _Self, factor: int) -> _Self:
         if not isinstance(factor, int):
             return NotImplemented
         return self.times(factor)
 
     __rmul__ = __mul__
 
-    def _issubset(self, other, strict):
+    def _issubset(self, other: _OtherType, strict: bool) -> bool:
         other = self._as_multiset(other)
         self_len = self._total
         other_len = len(other)
@@ -450,7 +454,7 @@ class BaseMultiset(object):
             return False
         return all(multiplicity <= other[element] for element, multiplicity in self.items())
 
-    def issubset(self, other):
+    def issubset(self, other: _OtherType) -> bool:
         """Return True iff this set is a subset of the other.
 
         >>> Multiset('ab').issubset('aabc')
@@ -477,21 +481,21 @@ class BaseMultiset(object):
         """
         return self._issubset(other, False)
 
-    def __le__(self, other):
+    def __le__(self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issubset(other, False)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issubset(other, True)
 
-    def _issuperset(self, other, strict):
+    def _issuperset(self, other: _OtherType, strict: bool) -> bool:
         other = self._as_multiset(other)
         other_len = len(other)
         if len(self) < other_len:
@@ -503,7 +507,7 @@ class BaseMultiset(object):
                 return False
         return True
 
-    def issuperset(self, other):
+    def issuperset(self, other: _OtherType) -> bool:
         """Return True iff this multiset is a superset of the other.
 
         >>> Multiset('aabc').issuperset('ab')
@@ -530,21 +534,21 @@ class BaseMultiset(object):
         """
         return self._issuperset(other, False)
 
-    def __ge__(self, other):
+    def __ge__(self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issuperset(other, False)
 
-    def __gt__(self, other):
+    def __gt__(self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issuperset(other, True)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, BaseMultiset):
             return self._total == other._total and self._elements == other._elements
         if isinstance(other, (set, frozenset)):
@@ -555,7 +559,7 @@ class BaseMultiset(object):
             return False
         return self._issubset(other, False)
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         if isinstance(other, BaseMultiset):
             return self._total != other._total or self._elements != other._elements
         if isinstance(other, (set, frozenset)):
@@ -566,7 +570,7 @@ class BaseMultiset(object):
             return True
         return not self._issubset(other, False)
 
-    def get(self, element, default):
+    def get(self, element: _TElement, default: int) -> int:
         """Return the multiplicity for *element* if it is in the multiset, else *default*.
 
         Makes the *default* argument of the original :meth:`dict.get` non-optional.
@@ -581,7 +585,7 @@ class BaseMultiset(object):
         return self._elements.get(element, default)
 
     @classmethod
-    def from_elements(cls, elements, multiplicity):
+    def from_elements(cls: Type[_Self], elements: Iterable[_TElement], multiplicity: int) -> _Self:
         """Create a new multiset with the given *elements* and each multiplicity set to *multiplicity*.
 
         Uses :meth:`dict.fromkeys` internally.
@@ -595,19 +599,19 @@ class BaseMultiset(object):
         """
         return cls(dict.fromkeys(elements, multiplicity))
 
-    def copy(self):
+    def copy(self: _Self) -> _Self:
         """Return a shallow copy of the multiset."""
         return self.__class__(self)
 
     __copy__ = copy
 
-    def items(self):
+    def items(self) -> ItemsView[_TElement, int]:
         return self._elements.items()
 
-    def distinct_elements(self):
+    def distinct_elements(self) -> KeysView[_TElement]:
         return self._elements.keys()
 
-    def multiplicities(self):
+    def multiplicities(self) -> ValuesView[int]:
         return self._elements.values()
 
     values = multiplicities
@@ -648,11 +652,12 @@ class BaseMultiset(object):
     def __setstate__(self, state):
         self._total, self._elements = state
 
-class Multiset(BaseMultiset):
+
+class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TElement]):
     """The mutable multiset variant."""
     __slots__ = ()
 
-    def __setitem__(self, element, multiplicity):
+    def __setitem__(self, element: _TElement, multiplicity: int):
         """Set the element's multiplicity.
 
         This will remove the element if the multiplicity is less than or equal to zero.
@@ -672,7 +677,7 @@ class Multiset(BaseMultiset):
             _elements[element] = multiplicity
             self._total += multiplicity
 
-    def __delitem__(self, element):
+    def __delitem__(self, element: _TElement):
         _elements = self._elements
         if element in _elements:
             self._total -= _elements[element]
@@ -680,7 +685,7 @@ class Multiset(BaseMultiset):
         else:
             raise KeyError("Could not delete {!r} from the multiset, because it is not in it.".format(element))
 
-    def update(self, *others, **kwargs):
+    def update(self, *others: _OtherType, **kwargs):
         r"""Like :meth:`dict.update` but add multiplicities instead of replacing them.
 
         >>> ms = Multiset('aab')
@@ -720,7 +725,7 @@ class Multiset(BaseMultiset):
                     _total += multiplicity
         self._total = _total
 
-    def union_update(self, *others):
+    def union_update(self, *others: _OtherType):
         r"""Update the multiset, adding elements from all others using the maximum multiplicity.
 
         >>> ms = Multiset('aab')
@@ -753,7 +758,7 @@ class Multiset(BaseMultiset):
                     _total += multiplicity - old_multiplicity
         self._total = _total
 
-    def __ior__(self, other):
+    def __ior__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -761,7 +766,7 @@ class Multiset(BaseMultiset):
         self.union_update(other)
         return self
 
-    def intersection_update(self, *others):
+    def intersection_update(self, *others: _OtherType):
         r"""Update the multiset, keeping only elements found in it and all others.
 
         >>> ms = Multiset('aab')
@@ -790,7 +795,7 @@ class Multiset(BaseMultiset):
                 if multiplicity < current_count:
                     self[element] = multiplicity
 
-    def __iand__(self, other):
+    def __iand__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -798,7 +803,7 @@ class Multiset(BaseMultiset):
         self.intersection_update(other)
         return self
 
-    def difference_update(self, *others):
+    def difference_update(self, *others: _OtherType):
         r"""Remove all elements contained the others from this multiset.
 
         >>> ms = Multiset('aab')
@@ -825,7 +830,7 @@ class Multiset(BaseMultiset):
             for element, multiplicity in other.items():
                 self.discard(element, multiplicity)
 
-    def __isub__(self, other):
+    def __isub__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -833,7 +838,7 @@ class Multiset(BaseMultiset):
         self.difference_update(other)
         return self
 
-    def symmetric_difference_update(self, other):
+    def symmetric_difference_update(self, other: _OtherType):
         r"""Update the multiset to contain only elements in either this multiset or the other but not both.
 
         >>> ms = Multiset('aab')
@@ -863,7 +868,7 @@ class Multiset(BaseMultiset):
             other_count = other[element]
             self[element] = (multiplicity - other_count if multiplicity > other_count else other_count - multiplicity)
 
-    def __ixor__(self, other):
+    def __ixor__(self: _Self, other: Set[_TElement] | 'BaseMultiset[_TElement]') -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -871,7 +876,7 @@ class Multiset(BaseMultiset):
         self.symmetric_difference_update(other)
         return self
 
-    def times_update(self, factor):
+    def times_update(self, factor: int):
         """Update each this multiset by multiplying each element's multiplicity with the given scalar factor.
 
         >>> ms = Multiset('aab')
@@ -902,13 +907,13 @@ class Multiset(BaseMultiset):
                 _elements[element] *= factor
             self._total *= factor
 
-    def __imul__(self, factor):
+    def __imul__(self: _Self, factor: int) -> _Self:
         if not isinstance(factor, int):
             raise TypeError("factor must be an integer.")
         self.times_update(factor)
         return self
 
-    def add(self, element, multiplicity=1):
+    def add(self, element: _TElement, multiplicity: int = 1):
         """Adds an element to the multiset.
 
         >>> ms = Multiset()
@@ -935,7 +940,7 @@ class Multiset(BaseMultiset):
         self._elements[element] += multiplicity
         self._total += multiplicity
 
-    def remove(self, element, multiplicity=None):
+    def remove(self, element: _TElement, multiplicity: Optional[int] = None) -> int:
         """Removes an element from the multiset.
 
         If no multiplicity is specified, the element is completely removed from the multiset:
@@ -990,7 +995,7 @@ class Multiset(BaseMultiset):
             self._total -= multiplicity
         return old_multiplicity
 
-    def discard(self, element, multiplicity=None):
+    def discard(self, element: _TElement, multiplicity: Optional[int] = None) -> int:
         """Removes the `element` from the multiset.
 
         If multiplicity is ``None``, all occurrences of the element are removed:
@@ -1051,7 +1056,7 @@ class Multiset(BaseMultiset):
         else:
             return 0
 
-    def pop(self, element, default):
+    def pop(self, element: _TElement, default: int) -> int:
         """If *element* is in the multiset, remove it and return its multiplicity, else return *default*.
 
         Makes the *default* argument of the original :meth:`dict.pop` non-optional.
@@ -1064,11 +1069,11 @@ class Multiset(BaseMultiset):
             The multiplicity for *element* if it is in the multiset, else *default*.
         """
         rm_size = self._elements.get(element)
-        if rm_size != None:
+        if rm_size is not None:
             self._total -= rm_size
         return self._elements.pop(element, default)
 
-    def setdefault(self, element, default):
+    def setdefault(self, element: _TElement, default: int) -> int:
         """If *element* is in the multiset, return its multiplicity.
         Else add it with a multiplicity of *default* and return *default*.
 
@@ -1083,7 +1088,7 @@ class Multiset(BaseMultiset):
         """
 
         mul = self._elements.get(element)
-        if mul == None:
+        if mul is None:
             if default < 1:
                 raise ValueError("Multiplicity must be positive")
             self._total += default
@@ -1095,12 +1100,13 @@ class Multiset(BaseMultiset):
         self._total = 0
 
 
-class FrozenMultiset(BaseMultiset):
+class FrozenMultiset(BaseMultiset[_TElement], Generic[_TElement]):
     """The frozen multiset variant that is immutable and hashable."""
     __slots__ = ()
 
     def __hash__(self):
         return hash(frozenset(self._elements.items()))
+
 
 Mapping.register(BaseMultiset)  # type: ignore
 MutableMapping.register(Multiset)  # type: ignore
