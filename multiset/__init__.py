@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
-from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional, Union,
+from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional, Iterable,
                     Type, ItemsView, KeysView, ValuesView, MutableMapping as MutableMap)
 from collections import defaultdict
-from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
+from collections.abc import Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
 
 _sequence_types = (tuple, list, range, set, frozenset, str)
