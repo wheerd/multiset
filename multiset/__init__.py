@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
-from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional, Iterable,
+from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional, Iterable as Iter,
                     Type, ItemsView, KeysView, ValuesView, MutableMapping as MutableMap)
 from collections import defaultdict
-from collections.abc import Mapping, MutableMapping, Set, Sized, Container
+from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
 
 _sequence_types = (tuple, list, range, set, frozenset, str)
@@ -14,7 +14,7 @@ _all_basic_types = _sequence_types + _iter_types + (dict, )
 __all__ = ['BaseMultiset', 'Multiset', 'FrozenMultiset']
 
 _TElement = TypeVar('_TElement', bound=Hashable)
-_OtherType = Union[Iterable[_TElement], Map[_TElement, int]]
+_OtherType = Union[Iter[_TElement], Map[_TElement, int]]
 _Self = TypeVar('_Self', bound='BaseMultiset')
 
 
@@ -137,7 +137,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
     def __bool__(self) -> bool:
         return self._total > 0
 
-    def __iter__(self) -> Iterable[_TElement]:
+    def __iter__(self) -> Iter[_TElement]:
         return chain.from_iterable(starmap(repeat, self._elements.items()))
 
     def isdisjoint(self, other: _OtherType) -> bool:
@@ -585,7 +585,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         return self._elements.get(element, default)
 
     @classmethod
-    def from_elements(cls: Type[_Self], elements: Iterable[_TElement], multiplicity: int) -> _Self:
+    def from_elements(cls: Type[_Self], elements: Iter[_TElement], multiplicity: int) -> _Self:
         """Create a new multiset with the given *elements* and each multiplicity set to *multiplicity*.
 
         Uses :meth:`dict.fromkeys` internally.
