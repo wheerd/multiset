@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """An implementation of a multiset."""
-from typing import (Generic, TypeVar, Hashable, Mapping as Map, Union, Optional, Iterable as Iter,
-                    Type, ItemsView, KeysView, ValuesView, MutableMapping as MutableMap)
+from typing import (Generic, TypeVar, Hashable, Mapping as MappingType, Union, Optional, Iterable as IterableType,
+                    Type, ItemsView, KeysView, ValuesView, MutableMapping as MutableMappingType, AbstractSet as SetType)
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping, Set, Sized, Container
 from itertools import chain, repeat, starmap
@@ -14,11 +14,11 @@ _all_basic_types = _sequence_types + _iter_types + (dict, )
 __all__ = ['BaseMultiset', 'Multiset', 'FrozenMultiset']
 
 _TElement = TypeVar('_TElement', bound=Hashable)
-_OtherType = Union[Iter[_TElement], Map[_TElement, int]]
+_OtherType = Union[IterableType[_TElement], MappingType[_TElement, int]]
 _Self = TypeVar('_Self', bound='BaseMultiset')
 
 
-class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
+class BaseMultiset(MappingType[_TElement, int], Generic[_TElement]):
     """A multiset implementation.
 
     A multiset is similar to the builtin :class:`set`, but elements can occur multiple times in the multiset.
@@ -137,7 +137,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
     def __bool__(self) -> bool:
         return self._total > 0
 
-    def __iter__(self) -> Iter[_TElement]:
+    def __iter__(self) -> IterableType[_TElement]:
         return chain.from_iterable(starmap(repeat, self._elements.items()))
 
     def isdisjoint(self, other: _OtherType) -> bool:
@@ -202,14 +202,14 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         result._total = _total
         return result
 
-    def __sub__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __sub__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self.difference(other)
 
-    def __rsub__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __rsub__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if not isinstance(other, (Set, BaseMultiset)):
             return NotImplemented
         return self._as_multiset(other).difference(self)
@@ -250,7 +250,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         result._total = _total
         return result
 
-    def __or__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __or__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -299,7 +299,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         result._total = _total
         return result
 
-    def __add__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __add__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -348,7 +348,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         result._total = _total
         return result
 
-    def __and__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __and__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -399,7 +399,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         result._total = _total
         return result
 
-    def __xor__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __xor__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -481,14 +481,14 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         """
         return self._issubset(other, False)
 
-    def __le__(self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> bool:
+    def __le__(self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issubset(other, False)
 
-    def __lt__(self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> bool:
+    def __lt__(self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -534,14 +534,14 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         """
         return self._issuperset(other, False)
 
-    def __ge__(self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> bool:
+    def __ge__(self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
             return NotImplemented
         return self._issuperset(other, False)
 
-    def __gt__(self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> bool:
+    def __gt__(self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> bool:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -585,7 +585,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         return self._elements.get(element, default)
 
     @classmethod
-    def from_elements(cls: Type[_Self], elements: Iter[_TElement], multiplicity: int) -> _Self:
+    def from_elements(cls: Type[_Self], elements: IterableType[_TElement], multiplicity: int) -> _Self:
         """Create a new multiset with the given *elements* and each multiplicity set to *multiplicity*.
 
         Uses :meth:`dict.fromkeys` internally.
@@ -653,7 +653,7 @@ class BaseMultiset(Map[_TElement, int], Generic[_TElement]):
         self._total, self._elements = state
 
 
-class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TElement]):
+class Multiset(BaseMultiset[_TElement], MutableMappingType[_TElement, int], Generic[_TElement]):
     """The mutable multiset variant."""
     __slots__ = ()
 
@@ -758,7 +758,7 @@ class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TEl
                     _total += multiplicity - old_multiplicity
         self._total = _total
 
-    def __ior__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __ior__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -795,7 +795,7 @@ class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TEl
                 if multiplicity < current_count:
                     self[element] = multiplicity
 
-    def __iand__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __iand__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -830,7 +830,7 @@ class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TEl
             for element, multiplicity in other.items():
                 self.discard(element, multiplicity)
 
-    def __isub__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __isub__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
@@ -868,7 +868,7 @@ class Multiset(BaseMultiset[_TElement], MutableMap[_TElement, int], Generic[_TEl
             other_count = other[element]
             self[element] = (multiplicity - other_count if multiplicity > other_count else other_count - multiplicity)
 
-    def __ixor__(self: _Self, other: Union[Set[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
+    def __ixor__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
             pass
         elif not isinstance(other, Set):
