@@ -14,7 +14,7 @@ _all_basic_types = _sequence_types + _iter_types + (dict, )
 __all__ = ['BaseMultiset', 'Multiset', 'FrozenMultiset']
 
 _TElement = TypeVar('_TElement', bound=Hashable)
-_OtherType = Union[Iterable[_TElement], Mapping[_TElement, int]]
+_OtherType = Union[Iterable[_TElement], Map[_TElement, int]]
 _Self = TypeVar('_Self', bound='BaseMultiset')
 
 
