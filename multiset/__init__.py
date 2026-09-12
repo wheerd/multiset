@@ -827,6 +827,9 @@ class Multiset(BaseMultiset[_TElement], MutableMappingType[_TElement, int], Gene
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
         for other in map(self._as_multiset, others):
+            if other is self:
+                self.clear()
+                continue
             for element, multiplicity in other.items():
                 self.discard(element, multiplicity)
 

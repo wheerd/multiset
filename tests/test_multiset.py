@@ -1006,3 +1006,21 @@ def test_multiplicities(MultisetCls):
 def test_distinct_elements(MultisetCls):
     ms = MultisetCls('aaabbc')
     assert sorted(ms.distinct_elements()) == list('abc')
+
+
+@pytest.mark.parametrize('initial', ['', 'a', 'aabbc'])
+def test_difference_update_self(initial):
+    ms = Multiset(initial)
+    ms.difference_update(ms)
+    assert len(ms) == 0
+    assert list(ms) == []
+
+
+@pytest.mark.parametrize('initial', ['a', 'aabbc'])
+def test_inplace_subtraction_self(initial):
+    ms = Multiset(initial)
+    original = ms
+    ms -= ms
+    assert ms is original
+    assert len(ms) == 0
+    assert list(ms) == []
