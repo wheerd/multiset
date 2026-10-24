@@ -716,14 +716,12 @@ class Multiset(BaseMultiset[_TElement], MutableMappingType[_TElement, int], Gene
             kwargs: Additional pairs of values and multiplicities to be added to multiset.
         """
         _elements = self._elements
-        _total = self._total
         for other in map(self._as_mapping, others + (kwargs, )):
             for element, multiplicity in other.items():
                 if multiplicity > 0:
                     old_multiplicity = _elements.get(element, 0)
                     _elements[element] = multiplicity + old_multiplicity
-                    _total += multiplicity
-        self._total = _total
+                    self._total += multiplicity
 
     def union_update(self, *others: _OtherType):
         r"""Update the multiset, adding elements from all others using the maximum multiplicity.
@@ -749,14 +747,12 @@ class Multiset(BaseMultiset[_TElement], MutableMappingType[_TElement, int], Gene
                 or :class:`~typing.Mapping`\[~T, :class:`int`] which are then converted to :class:`Multiset`\[~T].
         """
         _elements = self._elements
-        _total = self._total
         for other in map(self._as_mapping, others):
             for element, multiplicity in other.items():
                 old_multiplicity = _elements.get(element, 0)
                 if multiplicity > old_multiplicity:
                     _elements[element] = multiplicity
-                    _total += multiplicity - old_multiplicity
-        self._total = _total
+                    self._total += multiplicity - old_multiplicity
 
     def __ior__(self: _Self, other: Union[SetType[_TElement], 'BaseMultiset[_TElement]']) -> _Self:
         if isinstance(other, (BaseMultiset, set, frozenset)):
